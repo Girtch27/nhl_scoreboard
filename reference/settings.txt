@@ -1,0 +1,3 @@
+Enter team_id [Maple Leafs or Capitals or Minnesota Wild or Blackhawks] and delay seconds? [20], each on a separate line in this order. LEAVE EMPTY if you want to manually input every time.
+Maple Leafs
+0

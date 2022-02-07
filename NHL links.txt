@@ -1,0 +1,37 @@
+url = http://statsapi.web.nhl.com/api/v1/
+
+http://statsapi.web.nhl.com/api/v1/teams
+
+url = '{0}schedule?teamId={1}'.format(NHL_API_URL, team_id)
+http://statsapi.web.nhl.com/api/v1/schedule?teamId=10
+
+
+http://statsapi.web.nhl.com/api/v1/schedule?teamId=54
+
+http://statsapi.web.nhl.com/api/v1/schedule?teamId=10&date=2022-02-07  *or whatever date
+
+game content, look for goal and description!
+http://statsapi.web.nhl.com/api/v1/game/2021020702/content
+
+look for cut pic or flash mp4 replay
+
+
+Steps
+* simulate NHL API info using exampleNHLfile.json
+
+1] get game status based on chosen team and today's date
+send http://statsapi.web.nhl.com/api/v1/schedule?teamId=10&date=2022-02-07  *or whatever date
+receive "detailedState" : "Scheduled"
+"No Game" is nhl api has nothing for requested date, my code returns "No Game" for that date, should try next day,
+"Scheduled" is ???, guessing there is a game on requested date but not for several hours away,
+"Pre-Game" game starts in a couple hours
+"In Progress" game is on
+"Final" game is over
+
+if No Game
+* simule NHL API info using futuregame.json
+find next game date and game info
+
+
+
+
