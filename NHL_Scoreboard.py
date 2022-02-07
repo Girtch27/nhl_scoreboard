@@ -7,8 +7,8 @@ bgcolorDefault = window.cget("background") #get default color to store to later 
 window.configure(background=bgcolorDefault) #set back to default color
 
 original_bgcolor = "light grey" #original_bgcolor is user selected color
-original_bgcolor = bgcolorDefault #original_bgcolor is user selected color
 original_bgcolor = "light blue" #original_bgcolor is user selected color
+original_bgcolor = bgcolorDefault #original_bgcolor is user selected color
 
 bgcolor = original_bgcolor #bgcolor used by all widgets
 window['bg']= bgcolor

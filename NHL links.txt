@@ -1,3 +1,9 @@
+https://github.com/Girtch27/NHL_Scoreboard.git
+https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+git remote add origin git@github.com:Girtch27/NHL_Scoreboard.git
+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
+
+
 url = http://statsapi.web.nhl.com/api/v1/
 
 http://statsapi.web.nhl.com/api/v1/teams
