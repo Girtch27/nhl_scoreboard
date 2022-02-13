@@ -90,7 +90,8 @@ def get_next_game_date(team_id):
     utc_game_time = requests.get(url).json()
     utc_game_time = utc_game_time['dates'][0]['games'][0]['gameDate']
     next_game_time24hr = convert_to_local_time(utc_game_time) - datetime.timedelta(seconds=30)
-    next_game_time12hr = convert_to_local_time(utc_game_time) - datetime.timedelta(hours=12)
+    next_game_time12hr = convert_to_local_time(utc_game_time) #- datetime.timedelta(hours=12)
+    next_game_time12hr = next_game_time12hr.strftime('%A %B %d at %I:%M%p') #without time zone
     next_game_day = date_test
     return next_game_time24hr, next_game_day, next_game_time12hr
 

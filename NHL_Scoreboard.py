@@ -81,9 +81,10 @@ myTeam = "Flames"
 myTeam = "Sharks"
 myTeam = "Wild"
 myTeam = "Golden Knights"
-myTeam = "Maple Leafs"
 myTeam = "Canadiens"
 myTeam = "Stars"
+myTeam = "Maple Leafs"
+
 
 window.title(myTeam + ' NHL Scoreboard')
 ScoreVerse = "vs"
@@ -250,9 +251,10 @@ def update():
             LabelDesc1["text"] = '{0} (away) vs {1} (home)'.format(away_team, home_team)
         else:
             LabelDesc1["text"] = '{0} (home) vs {1} (away)'.format(home_team, away_team)
-            LabelDesc2["text"] = '{0} next game is {1}'.format(myTeam, next_game_date_12hr)
         if (today == next_game_day):
             LabelDesc2["text"] = '{0} next game is TODAY! {1}'.format(myTeam, next_game_date_12hr)
+        else:
+            LabelDesc2["text"] = '{0} next game is {1}'.format(myTeam, next_game_date_12hr)
                 
     elif ('Scheduled' in game_status):
         #game later today, find next game info
@@ -319,7 +321,7 @@ def update():
                     #light.activate_goal_light()
 
     elif ('Final' in game_status):
-        updateSpeed = int(1000) # 30mins
+        updateSpeed = int(30*60*1000) # 30mins
         #light.cleanup()
         print (game_status + ':' + str(updateSpeed) + ". Game ended, cleanning up!")
         
@@ -343,13 +345,13 @@ def update():
         LabelDesc2["text"] = ""
     
     elif ('Game Over' in game_status):
-        updateSpeed = int(1000) # 30mins
+        updateSpeed = int(1*60*60*1000) # 1hr
         gameInfoUpdated = False #update game info flag
         print(game_status + ':' + str(updateSpeed))
         
     else:
         print(game_status + ':' + str(updateSpeed) + ". ***invalid state***")
-        updateSpeed = int(120*60*1000) # 2hr, delay as not gameday so could be waiting a few days... or could pause until game day.
+        updateSpeed = int(2*60*60*1000) # 2hr
         
     
     # save the panel's image from 'garbage collection'
