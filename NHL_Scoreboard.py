@@ -55,7 +55,7 @@ from lib import nhl, light
 delay_checked = False #delay_checked
 delay = 0.0 #delay used before starting goal notifications, set to 0 and see if too early compared to TV??
 delay = float(delay) #delay used before starting goal notifications
-updateInfo = True #update info when game is on or about to start
+gameInfoUpdated = False #update game info flag
 updateSpeed = int(10*1000) #delay before checking game status & game scores
 game_status = "waiting"
 old_score = 100 #old_score for followed team, play notification
@@ -74,16 +74,16 @@ home_logo = PhotoImage(file="/home/pi/nhl_scoreboard/images/PNG/NHL.png")
 away_logo = PhotoImage(file="/home/pi/nhl_scoreboard/images/PNG/NHL.png")
 
 #myTeam is the team I want to follow
-myTeam = "Golden Knights"
-myTeam = "Panthers"
-myTeam = "Golden Knights"
+
 myTeam = "Rangers"
 myTeam = "Panthers"
 myTeam = "Flames"
 myTeam = "Sharks"
 myTeam = "Wild"
+myTeam = "Golden Knights"
 myTeam = "Maple Leafs"
-
+myTeam = "Canadiens"
+myTeam = "Stars"
 
 window.title(myTeam + ' NHL Scoreboard')
 ScoreVerse = "vs"
@@ -130,22 +130,27 @@ def logo(image1, image2):
     imgX2= Image.open(defaultIMG2)
     away_logo = ImageTk.PhotoImage(imgX2)
 
-def updateTeamInfo():
+def updateTeamInfo(nextGameDate):
     '''update info only before or after a game, not during'''
     global away_team_ID
     global home_team_ID
+    global gameInfoUpdated
     
-    LabelCityAway["text"] = 'City ' + nhl.get_team_arena_city(away_team_ID)
+    LabelCityAway["text"] = nhl.get_team_arena_city(away_team_ID)
     LabelArenaAway["text"] = nhl.get_team_arena_name(away_team_ID)
-    LabelHistoryAway["text"] = 'Founded ' + nhl.get_team_history(away_team_ID)
-    LabelDivisionAway["text"] = 'Division ' + nhl.get_team_division_info(away_team_ID)
-    LabelConferenceAway["text"] = 'Conference ' + nhl.get_team_conference_info(away_team_ID)    
+    LabelHistoryAway["text"] = 'Founded in ' + nhl.get_team_history(away_team_ID)
+    LabelDivisionAway["text"] = nhl.get_team_division_info(away_team_ID) + ' Division'
+    LabelConferenceAway["text"] = nhl.get_team_conference_info(away_team_ID) + ' Conference'   
+    LabelRecordAway["text"] = nhl.get_team_record_info(away_team_ID, nextGameDate)
 
-    LabelCityHome["text"] = 'City ' + nhl.get_team_arena_city(home_team_ID)
+    LabelCityHome["text"] = nhl.get_team_arena_city(home_team_ID)
     LabelArenaHome["text"] = nhl.get_team_arena_name(home_team_ID)
-    LabelHistoryHome["text"] = 'Founded ' + nhl.get_team_history(home_team_ID)
-    LabelDivisionHome["text"] = 'Division ' + nhl.get_team_division_info(home_team_ID)
-    LabelConferenceHome["text"] = 'Conference ' + nhl.get_team_conference_info(home_team_ID)
+    LabelHistoryHome["text"] = 'Founded in ' + nhl.get_team_history(home_team_ID)
+    LabelDivisionHome["text"] = nhl.get_team_division_info(home_team_ID) + ' Division'
+    LabelConferenceHome["text"] = nhl.get_team_conference_info(home_team_ID) + ' Conference'
+    LabelRecordHome["text"] = nhl.get_team_record_info(home_team_ID, nextGameDate)
+    
+    gameInfoUpdated = True #update game info flag
 
 def donothing():
     filewin = Toplevel(window)
@@ -191,7 +196,7 @@ def utilsImgtoPNG():
 def update():
     global bgcolor #background colour
     global delay #delay before starting goal notification
-    global updateInfo #dont update info when game is on or about to start
+    global gameInfoUpdated #update game info flag
     global updateSpeed #delay before checking game status & game scores
     global game_status
     global old_score #old_score for followed team, play notification
@@ -215,20 +220,23 @@ def update():
     team_id = nhl.get_team_id(myTeam)
     today = datetime.date.today()
     game_status = nhl.check_game_status(team_id,today) #send team_id and today's date, get back game status
-    
+        
+    if (gameInfoUpdated is False): #update game info
+        home_team, home_team_ID, away_team, away_team_ID, nextGameDate = nhl.get_next_game_info2(team_id)
+        logo(home_team_ID, away_team_ID) #home_logo , away_logo
+        updateTeamInfo(nextGameDate)
+            
     if ('No Game' in game_status):
         #no game today, find next game info  
-        home_team, home_team_ID, away_team, away_team_ID = nhl.get_next_game_info2(team_id)
+        home_team, home_team_ID, away_team, away_team_ID, nextGameDate = nhl.get_next_game_info2(team_id)
         print(game_status + ' today, next game is: ' + str(home_team) + ' vs ' + str(away_team))
-        logo(home_team_ID, away_team_ID) #home_logo , away_logo
-        updateTeamInfo()
-        updateSpeed = int(10*1000) # Xhours, delay as game hasn't started
+        updateSpeed = int(2*60*60*1000) # 2hours, delay as game hasn't started
         
         next_game_date_24hr, next_game_day, next_game_date_12hr  = nhl.get_next_game_date(team_id)
         today = datetime.date.today()
         next_home_team = home_team #set next game info and keep today's game info separate
         next_away_team = away_team #set next game info and keep today's game info separate
- 
+                
         if (today == next_game_day):
             game_status = nhl.check_game_status(team_id,today) #send team_id and today's date, get back game status
          
@@ -245,15 +253,12 @@ def update():
             LabelDesc2["text"] = '{0} next game is {1}'.format(myTeam, next_game_date_12hr)
         if (today == next_game_day):
             LabelDesc2["text"] = '{0} next game is TODAY! {1}'.format(myTeam, next_game_date_12hr)
-        
-        
+                
     elif ('Scheduled' in game_status):
         #game later today, find next game info
-        home_team, home_team_ID, away_team, away_team_ID = nhl.get_next_game_info2(team_id)
+        home_team, home_team_ID, away_team, away_team_ID, nextGameDate = nhl.get_next_game_info2(team_id)
         print(game_status + ', game today: ' + str(home_team) + ' vs ' + str(away_team))
-        logo(home_team_ID, away_team_ID) #home_logo , away_logo
-        updateTeamInfo()
-        updateSpeed = int(10*1000) # Xmins, delay as game hasn't started
+        updateSpeed = int(1*60*60*1000) # 1hours, delay as game hasn't started
         next_game_date_24hr, next_game_day, next_game_date_12hr  = nhl.get_next_game_date(team_id)
         today = datetime.date.today()
         LabelAwayName["text"] = away_team #was away_name
@@ -267,15 +272,14 @@ def update():
         LabelDesc2["text"] = '{0} next game is TODAY! {1}'.format(myTeam, next_game_date_12hr)
 
     elif ('In Progress' in game_status) or ('Pre-Game' in game_status):
-        updateInfo = False #dont update info when game is on or about to start
         new_score, home_score, away_score  = nhl.fetch_scores(team_id)
-
+        
         if ('Pre-Game' in game_status):
             LabelAwayName["text"] = away_team
             LabelHomeName["text"] = home_team
             LabelAwayScore["text"] = "0"
             LabelHomeScore["text"] = "0"
-            updateSpeed = int(6*1000) # 1min, delay as game hasn't started
+            updateSpeed = int(10*60*1000) # 10min, delay as game hasn't started
             LabelDesc1["text"] = '{0} warmups, get ready!'.format(game_status)
             LabelDesc2["text"] = ""
             
@@ -285,8 +289,11 @@ def update():
             LabelDesc1["text"] = 'Game {0}!'.format(game_status)
             updateSpeed = int(1000) # 1sec, game on check often
             LabelDesc2["text"] = ""
-            print(game_status + ':' + str(updateSpeed) + ', home:' + str(home_score) + ', away:' + str(away_score))
-            
+            print(game_status + ':' + str(updateSpeed) + '. home:' + str(home_score) + ', away:' + str(away_score))
+ 
+            '''Update GUI info'''
+            LabelAwayScore["text"] = away_score
+            LabelHomeScore["text"] = home_score
              
             '''Detect if score changed...'''
             if (home_score > old_home_score):
@@ -311,21 +318,12 @@ def update():
                     # activate_goal_light()
                     #light.activate_goal_light()
 
-    
-        '''Update GUI info
-        LabelAwayScore["text"] = away_score
-        LabelHomeScore["text"] = home_score
-        LabelAwayName["text"] = away_team
-        LabelHomeName["text"] = home_team
-        '''
-
     elif ('Final' in game_status):
-        updateSpeed = int(8*1000) # 30mins
+        updateSpeed = int(1000) # 30mins
         #light.cleanup()
-        print (game_status + ". Game ended, cleanning up!")
+        print (game_status + ':' + str(updateSpeed) + ". Game ended, cleanning up!")
         
         #put something here for game ended, team won
-
 
         '''Update GUI info'''
         LabelAwayScore["text"] = away_score
@@ -343,13 +341,16 @@ def update():
             else:
                 LabelDesc1["text"] = '{0} status is {1}. {0} lost!'.format(myTeam, game_status)
         LabelDesc2["text"] = ""
-       
+    
+    elif ('Game Over' in game_status):
+        updateSpeed = int(1000) # 30mins
+        gameInfoUpdated = False #update game info flag
+        print(game_status + ':' + str(updateSpeed))
+        
     else:
-        print('invalid state, ' + game_status)
-        updateInfo = True #dont update info when game is on or about to start
+        print(game_status + ':' + str(updateSpeed) + ". ***invalid state***")
         updateSpeed = int(120*60*1000) # 2hr, delay as not gameday so could be waiting a few days... or could pause until game day.
         
- 
     
     # save the panel's image from 'garbage collection'
     # panel1.image = image1
@@ -360,6 +361,7 @@ def update():
     
     window.after(updateSpeed, update) #run update function after Xms, must be cancel, idle, info, or an integer
 
+    
 '''create menu bar'''
 menubar = Menu(window)
 filemenu = Menu(menubar, tearoff=0)
@@ -416,14 +418,16 @@ LabelArenaAway = Label(window, bg = bgcolor, text=" <-Arena-> ")
 LabelHistoryAway = Label(window, bg = bgcolor, text=" <-Franchise Year-> ")
 LabelDivisionAway = Label(window, bg = bgcolor, text=" <-Division-> ")
 LabelConferenceAway = Label(window, bg = bgcolor, text=" <-Conference-> ")
+LabelRecordAway = Label(window, bg = bgcolor, text="<-W-L-OT->")
+LabelAwayPic = Label(window, bg = bgcolor, image=away_logo)
 
 LabelCityHome = Label(window, bg = bgcolor, text=" <-Location-> ")
 LabelArenaHome = Label(window, bg = bgcolor, text=" <-Arena-> ")
 LabelHistoryHome = Label(window, bg = bgcolor, text=" <-Franchise Year-> ")
 LabelDivisionHome = Label(window, bg = bgcolor, text=" <-Division-> ")
 LabelConferenceHome = Label(window, bg = bgcolor, text=" <-Conference-> ")
+LabelRecordHome = Label(window, bg = bgcolor, text="<-W-L-OT->")
 LabelHomePic = Label(window, bg = bgcolor, image=home_logo)
-LabelAwayPic = Label(window, bg = bgcolor, image=away_logo)
 
 #buttonStart = Button(window, text="Start", command=update)
 buttonExit = Button(window, bg = bgcolor, text="Exit", command=exit) #special command to exit & shutdown?
@@ -455,12 +459,14 @@ LabelArenaHome.grid(row=19, column=0)
 LabelHistoryHome.grid(row=20, column=0)
 LabelDivisionHome.grid(row=21, column=0)
 LabelConferenceHome.grid(row=22, column=0)
+LabelRecordHome.grid(row=23, column=0)
 
 LabelCityAway.grid(row=18, column=2)
 LabelArenaAway.grid(row=19, column=2)
 LabelHistoryAway.grid(row=20, column=2)
 LabelDivisionAway.grid(row=21, column=2)
 LabelConferenceAway.grid(row=22, column=2)
+LabelRecordAway.grid(row=23, column=2)
 
 #buttonStart.grid(row=24, column=0)
 #buttonExit.grid(row=24, column=3)

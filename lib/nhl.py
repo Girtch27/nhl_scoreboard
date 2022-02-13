@@ -21,7 +21,7 @@ def get_team_id(team_name):
     raise Exception("Could not find ID for team {0}".format(team_name))
 
 def check_game_status(team_id,date):
-    """ Function to check if there is a game now with chosen team. Returns True if game, False if NO game. """
+    """ Function to check if there is a game now with chosen team. Returns 'detailedState' Pre-game, Final, etc, if game, or "No Game' if NO game. """
     # Set URL depending on team selected and date
     url = '{0}schedule?teamId={1}&date={2}'.format(NHL_API_URL, team_id, date)
     #print(url)
@@ -98,9 +98,18 @@ def get_next_game_info2(team_id):
     """ Function to get game info (both team names & IDs) for next game that team_id plays"""
     date_test = datetime.date.today()
     gameday = check_game_status(team_id, date_test)
-
+    
+#     if (gameday is not "No Game"): #must be a game today, returned either:Pre-Game, In-progress, Final...
+#         home_team = next_game_info['dates'][0]['games'][0]['teams']['home']['team']['name']
+#         home_team_ID = next_game_info['dates'][0]['games'][0]['teams']['home']['team']['id']
+#         away_team = next_game_info['dates'][0]['games'][0]['teams']['away']['team']['name']
+#         away_team_ID = next_game_info['dates'][0]['games'][0]['teams']['away']['team']['id']
+#         print('not no game ' + home_team, home_team_ID, away_team, away_team_ID)
+#         return home_team, home_team_ID, away_team, away_team_ID #game must be today either about to start or started
+#   else:
+    
     #Keep going until game day found
-    while ("Scheduled" not in gameday):
+    while ("No Game" in gameday):
         date_test = date_test + datetime.timedelta(days=1)
         gameday = check_game_status(team_id, date_test)
 
@@ -112,8 +121,8 @@ def get_next_game_info2(team_id):
     home_team_ID = next_game_info['dates'][0]['games'][0]['teams']['home']['team']['id']
     away_team = next_game_info['dates'][0]['games'][0]['teams']['away']['team']['name']
     away_team_ID = next_game_info['dates'][0]['games'][0]['teams']['away']['team']['id']
-    #print(home_team, home_team_ID, away_team, away_team_ID)
-    return home_team, home_team_ID, away_team, away_team_ID
+    #print(home_team, home_team_ID, away_team, away_team_ID, date_test)
+    return home_team, home_team_ID, away_team, away_team_ID, date_test
 
 def get_team_arena_name(team_id):
     """ Function to get team of user and return arena name"""
@@ -185,6 +194,26 @@ def get_team_conference_info(team_id):
             
     raise Exception("Could not find conference info for team {0}".format(team_id))
 
+def get_team_record_info(team_id, date):
+    """ Function to get team of user and win,lose,ot record"""
+
+    #Get start time of next game
+    url = '{0}schedule?teamId={1}&date={2}'.format(NHL_API_URL, team_id, date)
+    #print(url)
+    team_record = requests.get(url).json()
+    home_team_ID = team_record['dates'][0]['games'][0]['teams']['home']['team']['id']
+    if team_id is home_team_ID:
+        team_recordW = team_record['dates'][0]['games'][0]['teams']['home']['leagueRecord']['wins']
+        team_recordL = team_record['dates'][0]['games'][0]['teams']['home']['leagueRecord']['losses']
+        team_recordOT = team_record['dates'][0]['games'][0]['teams']['home']['leagueRecord']['ot']
+        team_recordWLOT = str(team_recordW) + '-' + str(team_recordL) + '-' +  str(team_recordOT) + ' (W-L-OTL)'
+    else:
+        team_recordW = team_record['dates'][0]['games'][0]['teams']['away']['leagueRecord']['wins']
+        team_recordL = team_record['dates'][0]['games'][0]['teams']['away']['leagueRecord']['losses']
+        team_recordOT = team_record['dates'][0]['games'][0]['teams']['away']['leagueRecord']['ot']
+        team_recordWLOT = str(team_recordW) + '-' + str(team_recordL) + '-' +  str(team_recordOT) + ' (W-L-OTL)'
+    #print(str(team_id) + ' ' + str(date) + ' ' + team_recordWLOT)
+    return team_recordWLOT
 
 
 ''' future use
