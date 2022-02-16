@@ -7,7 +7,8 @@ Feb6	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
 
 
 git add .
-git commit -m "updated next game time format & removed timezone info"
+git commit -am "updated next game time format & removed timezone info"
+
 
 
 url = http://statsapi.web.nhl.com/api/v1/
