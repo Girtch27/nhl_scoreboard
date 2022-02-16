@@ -151,7 +151,6 @@ def updateTeamInfo(nextGameDate):
     LabelConferenceHome["text"] = nhl.get_team_conference_info(home_team_ID) + ' Conference'
     LabelRecordHome["text"] = nhl.get_team_record_info(home_team_ID, nextGameDate)
     
-    gameInfoUpdated = True #update game info flag
 
 def donothing():
     filewin = Toplevel(window)
@@ -226,6 +225,8 @@ def update():
         home_team, home_team_ID, away_team, away_team_ID, nextGameDate = nhl.get_next_game_info2(team_id)
         logo(home_team_ID, away_team_ID) #home_logo , away_logo
         updateTeamInfo(nextGameDate)
+        gameInfoUpdated = True #update game info flag
+        print('Game info updated. ' +  ' Home:' + str(home_team) + str(home_team_ID) + ', Away: ' + str(away_team) + str(away_team_ID))
             
     if ('No Game' in game_status):
         #no game today, find next game info  
@@ -323,6 +324,7 @@ def update():
     elif ('Final' in game_status):
         updateSpeed = int(30*60*1000) # 30mins
         #light.cleanup()
+        gameInfoUpdated = False #update game info flag
         print (game_status + ':' + str(updateSpeed) + ". Game ended, cleanning up!")
         
         #put something here for game ended, team won
