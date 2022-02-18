@@ -49,7 +49,7 @@ import datetime
 import pause
 
 '''my library NHL portion'''
-from lib import nhl, light
+from lib import nhl, alert
 
 ''' Initialize '''
 delay_checked = False #delay_checked
@@ -112,7 +112,7 @@ for imgToOpen in imgPNG:
     #print(img)
 
 
-light.setup() #lights and music\audio
+alert.setup() #lights and music\audio
 #print ("Team ID : {0} \nDelay to use : {1}\n".format(team_id,delay))
 print ("Delay to use : {0}\n".format(delay))
 
@@ -176,7 +176,9 @@ def utilsAudio():
     '''verify or setup somthing goes here'''
     
     '''check light and audio'''
-    light.activate_goal_light() # play a test sound?
+    #alert.activate_goal_light() # play a test sound?
+    alert.activate_audio('Another One Bites The Dust')
+
 
 def utilsImgtoPNG():
     '''convert all svg files one dir and save as PNG to another'''
@@ -307,7 +309,7 @@ def update():
                     pause.seconds(delay)
                     # update score
                     old_score = new_score
-                    light.activate_goal_audio()
+                    alert.activate_goal_audio()
 
             if (away_score > old_away_score):
                 LabelAwayScore["text"] = away_score
@@ -317,40 +319,45 @@ def update():
                     pause.seconds(delay)
                     # update score
                     old_score = new_score
-                    light.activate_goal_audio()
+                    alert.activate_goal_audio()
 
-    elif ('Final' in game_status):
+    elif ('Final' in game_status) or ('Game Over' in game_status):
         updateSpeed = int(30*60*1000) # 30mins
-        #light.cleanup()
+        #alert.cleanup()
         gameInfoUpdated = False #update game info flag
-        print (game_status + ':' + str(updateSpeed) + ". Game ended, cleanning up!")
+        print (game_status + ':' + str(updateSpeed) + ". Game ended, cleaning up!")
         
         #put something here for game ended, team won
-
+        
         '''Update GUI info'''
+        '''
         LabelAwayScore["text"] = away_score
         LabelHomeScore["text"] = home_score
         LabelAwayName["text"] = away_team
         LabelHomeName["text"] = home_team
-        if (away_name == 'Toronto Maple Leafs'): #if away team is leafs and they win or lost
-            if (away_score > home_score):
-                LabelDesc1["text"] = '{0} status is {1}. {0} won!!!'.format(myTeam, game_status)
-                light.activate_audio('Another One Bites The Dust')
+        if (team_id == away_team_ID): #if myteam's ID is away team and they win or lost
+            if (old_away_score > old_home_score):
+                LabelDesc1["text"] = '{0} status is {1}. {0} won!'.format(myTeam, game_status)
+                alert.activate_audio('Another One Bites The Dust')
             else:
                 LabelDesc1["text"] = '{0} status is {1}. {0} lost!'.format(myTeam, game_status)
-        else: #if home team is leafs and they win or lost
-            if (home_score > away_score):
+        elif (team_id == home_team_ID): #if myteam's ID is away team and they win or lost
+            if (old_home_score > old_away_score):
                 LabelDesc1["text"] = '{0} status is {1}. {0} won!!!'.format(myTeam, game_status)
-                light.activate_audio('Another One Bites The Dust')
+                alert.activate_audio('Another One Bites The Dust')
             else:
-                LabelDesc1["text"] = '{0} status is {1}. {0} lost!'.format(myTeam, game_status)
+                LabelDesc1["text"] = '{0} status is {1}. {0} lost!!!'.format(myTeam, game_status)
+                print(str(old_home_score) + ',' + str(old_away_score))
+        
+        else:
+            LabelDesc1["text"] = '{0} : {1}. {2} INVALID Result!'.format(myTeam, team_id, game_status)
+        '''
+
+            
+        
+        LabelDesc1["text"] = ""
         LabelDesc2["text"] = ""
     
-    elif ('Game Over' in game_status):
-        updateSpeed = int(1*60*60*1000) # 1hr
-        gameInfoUpdated = False #update game info flag
-        print(game_status + ':' + str(updateSpeed))
-        
     else:
         print(game_status + ':' + str(updateSpeed) + ". ***invalid state***")
         updateSpeed = int(2*60*60*1000) # 2hr
