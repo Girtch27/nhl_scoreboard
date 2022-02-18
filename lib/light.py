@@ -35,16 +35,16 @@ def activate_goal_audio():
     #pygame.mixer.music.load('/home/pi/nhl_goal_light/audio/TML_goal_horn.mp3') #force to play 1 song
     #?? GPIO.output(7, GPIO.HIGH) #Turn on light, active low relay, so on is low
     pygame.mixer.music.play()
-    while pygame.mixer.music.get_busy() == True:
-        continue
+    #while pygame.mixer.music.get_busy() == True:
+    #   continue
 
 def activate_audio(audio):
     """ Function to play random audio clip"""
     pygame.mixer.init()
     pygame.mixer.music.load('/home/pi/nhl_goal_light/audio/{0}.mp3'.format(audio)) #random song
     pygame.mixer.music.play()
-    while pygame.mixer.music.get_busy() == True:
-        continue
+    #while pygame.mixer.music.get_busy() == True:
+    #    continue
 
 def cleanup():
     """ Function to cleanup raspberry pi GPIO at end of code """
