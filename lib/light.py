@@ -22,17 +22,29 @@ def setup():
 
 
 def activate_goal_light(gpio_event_var=0):
-    """ Function to activate GPIO for goal light and plar random audio clip. TML_goal_horn.mp3"""
+    """ Function to activate GPIO for goal light """
+   #?? GPIO.output(7, GPIO.HIGH) #Turn on light, active low relay, so on is low
+    #?? GPIO.output(7, GPIO.LOW) #Turn off light
+    
+def activate_goal_audio():
+    """ Function to play random audio clip. TML_goal_horn.mp3"""
     songrandom = random.randint(1, 2) #Set random numbers depending on number of audio clips available
-    # Prepare commande to play sound (change file name if needed)
+    # Prepare command to play sound (change file name if needed)
     pygame.mixer.init()
-    pygame.mixer.music.load('/home/pi/nhl_goal_light/audio/TML_goal_horn_{SongId}.mp3'.format(SongId=str(songrandom))) #random song
+    pygame.mixer.music.load('/home/pi/nhl_scoreboard/audio/TML_goal_horn_{SongId}.mp3'.format(SongId=str(songrandom))) #random song
     #pygame.mixer.music.load('/home/pi/nhl_goal_light/audio/TML_goal_horn.mp3') #force to play 1 song
     #?? GPIO.output(7, GPIO.HIGH) #Turn on light, active low relay, so on is low
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy() == True:
         continue
-    #?? GPIO.output(7, GPIO.LOW) #Turn off light
+
+def activate_audio(audio):
+    """ Function to play random audio clip"""
+    pygame.mixer.init()
+    pygame.mixer.music.load('/home/pi/nhl_goal_light/audio/{0}.mp3'.format(audio)) #random song
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy() == True:
+        continue
 
 def cleanup():
     """ Function to cleanup raspberry pi GPIO at end of code """

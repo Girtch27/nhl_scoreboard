@@ -307,8 +307,7 @@ def update():
                     pause.seconds(delay)
                     # update score
                     old_score = new_score
-                    # activate_goal_light()
-                    #light.activate_goal_light()
+                    light.activate_goal_audio()
 
             if (away_score > old_away_score):
                 LabelAwayScore["text"] = away_score
@@ -318,8 +317,7 @@ def update():
                     pause.seconds(delay)
                     # update score
                     old_score = new_score
-                    # activate_goal_light()
-                    #light.activate_goal_light()
+                    light.activate_goal_audio()
 
     elif ('Final' in game_status):
         updateSpeed = int(30*60*1000) # 30mins
@@ -337,11 +335,13 @@ def update():
         if (away_name == 'Toronto Maple Leafs'): #if away team is leafs and they win or lost
             if (away_score > home_score):
                 LabelDesc1["text"] = '{0} status is {1}. {0} won!!!'.format(myTeam, game_status)
+                light.activate_audio('Another One Bites The Dust')
             else:
                 LabelDesc1["text"] = '{0} status is {1}. {0} lost!'.format(myTeam, game_status)
         else: #if home team is leafs and they win or lost
             if (home_score > away_score):
                 LabelDesc1["text"] = '{0} status is {1}. {0} won!!!'.format(myTeam, game_status)
+                light.activate_audio('Another One Bites The Dust')
             else:
                 LabelDesc1["text"] = '{0} status is {1}. {0} lost!'.format(myTeam, game_status)
         LabelDesc2["text"] = ""
