@@ -7,6 +7,10 @@ git remote add origin git@github.com:Girtch27/NHL_Scoreboard.git
 git add .
 git commit -am "updated next game time format & removed timezone info"
 
+MERGE
+https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
+git checkout master ***switch to the branch you want to merge into "master"
+git merge updates ***specify the name of the other branch to bring into this branch "updates"
 
 
 url = http://statsapi.web.nhl.com/api/v1/
@@ -22,7 +26,8 @@ http://statsapi.web.nhl.com/api/v1/schedule?teamId=54
 http://statsapi.web.nhl.com/api/v1/schedule?teamId=10&date=2022-02-07  *or whatever date
 
 game content, look for goal and description!
-http://statsapi.web.nhl.com/api/v1/game/2021020702/content
+http://statsapi.web.nhl.com/api/v1/game/2021020702/content   or,
+http://statsapi.web.nhl.com/api/v1/game/2021020488/content  
 
 look for cut pic or flash mp4 replay
 

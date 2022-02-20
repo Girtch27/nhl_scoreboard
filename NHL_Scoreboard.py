@@ -1,7 +1,12 @@
 from tkinter import *
-# Creating a GUI Window
+import time
+
+# Creating a GUI Windows
 window = Tk()
+#window_popup = Tk()
+
 window.title("NHL Scoreboard") #gets changed below after Team to follow is determined
+
 #set window color
 bgcolorDefault = window.cget("background") #get default color to store to later change back too
 window.configure(background=bgcolorDefault) #set back to default color
@@ -13,18 +18,25 @@ original_bgcolor = bgcolorDefault #original_bgcolor is user selected color
 bgcolor = original_bgcolor #bgcolor used by all widgets
 window['bg']= bgcolor
 
-#size
-windowWidth = 900
-windowHeight = 600
-windowXpos = 675
-windowYpos = 40
-SwindowWidth = str(windowWidth)
-SwindowHeight = str(windowHeight)
-SwindowXpos = str(windowXpos)
-SwindowYpos = str(windowYpos)
-windowSize = (SwindowWidth + "x" + SwindowHeight + "+" + SwindowXpos + "+" + SwindowYpos)
-#window.geometry("800x600+200+200")
-window.geometry(windowSize)
+# window size
+window_width = 900
+window_height = 600
+
+# get the screen dimension
+screen_width = window.winfo_screenwidth()
+screen_height = window.winfo_screenheight()
+
+# find the center point main window
+offset_x = 350 #set to 0 to be center or XXX to shift over
+offset_y = 0 #set to 0 to center or YYY to shift over
+center_x = int((screen_width/2 - window_width/2) + offset_x)
+center_y = int((screen_height/2 - window_height/2) + offset_y)
+
+
+# set the position of the window to the center of the screen, window.geometry("800x600+200+200")
+window.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
+
+
 
 '''
 guides and resources
@@ -36,6 +48,10 @@ https://github.com/199-cmd/ChangeImageInTkinter
 https://github.com/arim215/nhl_goal_light
 https://github.com/rpi-ws281x/rpi-ws281x-python #get led lights working
 '''
+
+''' video stuff '''
+from tkvideo import tkvideo
+#from tkVideoPlayer import TkinterVideo
 
 '''image stuff'''
 #from io import BytesIO
@@ -115,6 +131,49 @@ for imgToOpen in imgPNG:
 alert.setup() #lights and music\audio
 #print ("Team ID : {0} \nDelay to use : {1}\n".format(team_id,delay))
 print ("Delay to use : {0}\n".format(delay))
+
+def utilsVideo():
+    '''play a video highlight'''
+    #window_popup()
+    ''' video stuff '''
+    ''' pip3 install tkvideo '''
+    
+    window_popup = Toplevel(window)
+    
+    # find the center point popup window
+    window_popup_window_width = 320 #640
+    window_popup_window_height = 180 #360
+    window_popup_offset_x = offset_x #set to window's offset_x, or use something else, 0 to be center or XXX to shift over
+    window_popup_offset_y = window_height/2/2 #set to window's bottom edge, so 1/2
+    window_popup_center_x = int((screen_width/2 - window_popup_window_width/2) + window_popup_offset_x)
+    window_popup_center_y = int((screen_height/2 - window_popup_window_height/2) + window_popup_offset_y)
+    window_popup.geometry(f'{window_popup_window_width}x{window_popup_window_height}+{window_popup_center_x}+{window_popup_center_y}')
+    window_popup.title("Media Highlights")
+    
+    
+    # create label
+    video_label = Label(window_popup)
+    video_label.pack()
+    #read video to display on label
+    video = "https://hlslive-wsczoominwestus.med.nhl.com/editor/bec9b46f-07af-4a7a-9c06-c5899da0843a.mp4"
+    video = "https://hlslive-wsczoominwestus.med.nhl.com/editor/dc6c3957-01cb-40a0-93e3-47247d1e1b5d.mp4" #FLASH_1200K_640X360"
+    video = "https://hlslive-wsczoominwestus.med.nhl.com/editor/c9f56ab7-04e4-4f16-82ac-14a5fe6918e3.mp4" #FLASH_192K_320X180"
+    
+    #video = "https://hlslive-wsczoominwestus.med.nhl.com/editor/ab0160bf-aef0-44bb-8c5d-f79c16964ac0.mp4" #896x504
+    #video = "https://hlslive-wsczoominwestus.med.nhl.com/publish-hls/4326975/MasterTablet.m3u8"
+    player = tkvideo(video, video_label, loop = 0, size = (320, 180))
+    player.play()
+    
+'''  TkinterVideo  
+    videoplayer = TkinterVideo(master=window_popup, scaled=True, pre_load=False)
+    videoplayer.load(video)
+    videoplayer.pack(expand=True, fill="both")
+    videoplayer.play() # play the video
+'''
+
+def utilsVideoStop():
+    #global window_popup
+    window_popup.destroy()
 
 def logo(image1, image2):
     global home_logo
@@ -391,6 +450,8 @@ utilsmenu = Menu(menubar, tearoff=0)
 utilsmenu.add_command(label="Download Logos", command=donothing)
 utilsmenu.add_command(label="Convert Logos to PNG", command=utilsImgtoPNG)
 utilsmenu.add_separator()
+utilsmenu.add_command(label="Play Media Player", command=utilsVideo)
+utilsmenu.add_command(label="Stop Media Player", command=utilsVideoStop)
 utilsmenu.add_command(label="Test Audio", command=utilsAudio)
 utilsmenu.add_command(label="Test Light", command=donothing)
 utilsmenu.add_command(label="Test All", command=donothing)
