@@ -24,6 +24,8 @@ http://statsapi.web.nhl.com/api/v1/schedule?teamId=10
 http://statsapi.web.nhl.com/api/v1/schedule?teamId=54
 
 http://statsapi.web.nhl.com/api/v1/schedule?teamId=10&date=2022-02-07  *or whatever date
+http://statsapi.web.nhl.com//api/v1/game/2021020509/content
+"timeOffset" : "1098",
 
 game content, look for goal and description!
 http://statsapi.web.nhl.com/api/v1/game/2021020702/content   or,

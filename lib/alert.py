@@ -12,7 +12,7 @@ else :
 
 def setup():
     """ Function to setup raspberry pi GPIO mode and warnings. PIN 7 OUT and PIN 11 IN """
-
+ 
     # Setup GPIO on raspberry pi
     GPIO.setmode(GPIO.BOARD)
     GPIO.setwarnings(False)
