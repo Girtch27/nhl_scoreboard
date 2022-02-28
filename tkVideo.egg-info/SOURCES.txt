@@ -1,0 +1,8 @@
+README.md
+tkVideo.egg-info/PKG-INFO
+tkVideo.egg-info/SOURCES.txt
+tkVideo.egg-info/dependency_links.txt
+tkVideo.egg-info/not-zip-safe
+tkVideo.egg-info/requires.txt
+tkVideo.egg-info/top_level.txt
+tkvideo/setup.py
