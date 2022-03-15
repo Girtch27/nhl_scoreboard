@@ -23,7 +23,7 @@
       "status" : {
         "abstractGameState" : "Final",
         "codedGameState" : "6",
-        "detailedState" : "Final",
+        "detailedState" : "In Progress",
         "statusCode" : "6",
         "startTimeTBD" : false
       },
@@ -35,7 +35,7 @@
             "ot" : 5,
             "type" : "league"
           },
-          "score" : 1,
+          "score" : 4,
           "team" : {
             "id" : 1,
             "name" : "New Jersey Devils",
@@ -49,7 +49,7 @@
             "ot" : 3,
             "type" : "league"
           },
-          "score" : 0,
+          "score" : 3,
           "team" : {
             "id" : 10,
             "name" : "Toronto Maple Leafs",

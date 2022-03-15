@@ -1,7 +1,8 @@
 from tkinter import *
-#from tkinter import ttk
+from tkinter import ttk
 import time
 import datetime
+import schedule
 
 # Creating a GUI Windows
 window = Tk()
@@ -40,7 +41,8 @@ center_y = int((screen_height/2 - window_height/2) + offset_y)
 
 
 # set the position of the window to the center of the screen, window.geometry("800x600+200+200")
-window.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
+#window.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
+window.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
 
 content_date = datetime.date.today()
 content_date = content_date.strftime('%Y-%m-%d') #format should end us as "2022-02-22"
@@ -98,16 +100,17 @@ home_logo = PhotoImage(file="/home/pi/nhl_scoreboard/images/PNG/NHL.png")
 away_logo = PhotoImage(file="/home/pi/nhl_scoreboard/images/PNG/NHL.png")
 
 #myTeam is the team I want to follow
-
+myTeam = "Hurricanes"
 myTeam = "Rangers"
 myTeam = "Panthers"
-myTeam = "Flames"
 myTeam = "Sharks"
 myTeam = "Wild"
 myTeam = "Golden Knights"
 myTeam = "Canadiens"
 myTeam = "Stars"
 myTeam = "Maple Leafs"
+myTeam = "Flames"
+myTeam = "Lightning"
 
 
 window.title(myTeam + ' NHL Scoreboard')
@@ -238,7 +241,6 @@ def updateTeamInfo(nextGameDate):
     LabelConferenceHome["text"] = nhl.get_team_conference_info(home_team_ID) + ' Conference'
     LabelRecordHome["text"] = nhl.get_team_record_info(home_team_ID, nextGameDate)
     
-
 def donothing():
     filewin = Toplevel(window)
     button = Button(filewin, text="Do nothing button")
@@ -266,7 +268,6 @@ def utilsAudio():
     #alert.activate_goal_light() # play a test sound?
     alert.activate_audio('Another One Bites The Dust')
 
-
 def utilsImgtoPNG():
     '''convert all svg files one dir and save as PNG to another'''
     global img_width
@@ -283,14 +284,17 @@ def utilsImgtoPNG():
             cairosvg.svg2png(url=drSVG+name+'.svg',write_to=drPNG+name+'.png',parent_width=img_width, parent_height=img_height)
 
 def replay(content_team_id):
+#def replay():
     video_label = LabelMedia
     
-    #content_team_id = "10"
-    #content_date = "2022-02-22"
     content_date = datetime.date.today()
     content_date = content_date.strftime('%Y-%m-%d') #format should end us as "2022-02-22"
-    print('wait for media contect...')
-    time.sleep(60) #wait 2 mins for media content to be ready
+    
+    #content_team_id = "10"
+    #content_date = "2022-02-22" #for debug when using local json file
+    
+    print('check for media contect...')
+    #time.sleep(60) #wait 2 mins for media content to be ready
     content_url = media.get_content_url(content_team_id, content_date)
     #print('content_url returned is: ' + content_url)
     video_url = media.get_video_url(content_team_id, content_url)
@@ -302,10 +306,16 @@ def replay(content_team_id):
     '''
     
     description, highlight_description = media.get_goal_description(content_team_id, content_url)
-    LabelDesc3["text"] = 'Goal!!! {0}'.format(description)
-    #LabelDesc3["text"] = '{0}'.format(highlights_descr[1,2,3]) #us \n for a new line or wrap=WORD from https://www.tutorialspoint.com/how-to-word-wrap-text-in-tkinter-text
-    LabelDesc4["text"] = '{0}'.format(highlight_description)
-    
+    if ((description is not "") and (highlight_description is not "")):
+        LabelDesc3["text"] = 'Goal!!! {0}'.format(description)
+        #LabelDesc3["text"] = '{0}'.format(highlights_descr[1,2,3]) #us \n for a new line or wrap=WORD from https://www.tutorialspoint.com/how-to-word-wrap-text-in-tkinter-text
+        LabelDesc4["text"] = '{0}'.format(highlight_description)
+        print("un-scheduled.....................")
+        return schedule.CancelJob #cancel schedule until next goal detected
+    else:
+        LabelDesc3["text"] = 'Getting goal and {0}'.format(description)
+        LabelDesc4["text"] = 'highlights info... {0}'.format(highlight_description)
+
 def update():
     global bgcolor #background colour
     global delay #delay before starting goal notification
@@ -327,6 +337,7 @@ def update():
     global away_team_ID
     global home_team_ID
     
+        
     '''get info from NHL.com'''
     #print (game_status)
     team_id = nhl.get_team_id(myTeam)
@@ -370,6 +381,8 @@ def update():
             LabelDesc2["text"] = '{0} next game is TODAY! {1}'.format(myTeam, next_game_date_12hr)
         else:
             LabelDesc2["text"] = '{0} next game is {1}'.format(myTeam, next_game_date_12hr)
+        LabelDesc3["text"] = ""
+        LabelDesc4["text"] = ""
                 
     elif ('Scheduled' in game_status):
         #game later today, find next game info
@@ -387,6 +400,8 @@ def update():
         else:
             LabelDesc1["text"] = '{0} (home) vs {1} (away)'.format(home_team, away_team)
         LabelDesc2["text"] = '{0} next game is TODAY! {1}'.format(myTeam, next_game_date_12hr)
+        LabelDesc3["text"] = ""
+        LabelDesc4["text"] = ""
 
     elif ('In Progress' in game_status) or ('Pre-Game' in game_status):
         new_score, home_score, away_score  = nhl.fetch_scores(team_id)
@@ -399,6 +414,8 @@ def update():
             updateSpeed = int(10*60*1000) # 10min, delay as game hasn't started
             LabelDesc1["text"] = '{0} warmups, get ready!'.format(game_status)
             LabelDesc2["text"] = ""
+            LabelDesc3["text"] = ""
+            LabelDesc4["text"] = ""
             
         else:
             LabelAwayName["text"] = away_team
@@ -411,33 +428,46 @@ def update():
             '''Update GUI info'''
             LabelAwayScore["text"] = away_score
             LabelHomeScore["text"] = home_score
-            #LabelDesc1["text"] = description
-            #LabelDesc2["text"] = description + ' | ' + highlight_description
              
-            '''Detect if score changed...'''
-            if (home_score > old_home_score):
-                LabelHomeScore["text"] = home_score
-                if (team_id is home_team_ID):
-                    LabelDesc2["text"] = "GOAL!"
-                    old_home_score = home_score
-                    pause.seconds(delay)
-                    # update score
-                    old_score = new_score
-                    replay(team_id)
-                    alert.activate_goal_audio()
-                    
+#            '''Detect if score changed...'''
+#             if (home_score > old_home_score):
+#                 LabelHomeScore["text"] = home_score
+#                 if (team_id is home_team_ID):
+#                     LabelDesc2["text"] = "GOAL!"
+#                     old_home_score = home_score
+#                     pause.seconds(delay)
+#                     # update score
+#                     old_score = new_score
+#                     replay(team_id)
+#                     alert.activate_goal_audio()
+#                     
+#             if (away_score > old_away_score):
+#                 LabelAwayScore["text"] = away_score
+#                 if (team_id is away_team_ID):
+#                     LabelDesc2["text"] = "GOAL!"
+#                     old_away_score = away_score
+#                     pause.seconds(delay)
+#                     # update score
+#                     old_score = new_score
+#                     replay(team_id)
+#                     alert.activate_goal_audio()
 
-            if (away_score > old_away_score):
-                LabelAwayScore["text"] = away_score
-                if (team_id is away_team_ID):
-                    LabelDesc2["text"] = "GOAL!"
-                    old_away_score = away_score
-                    pause.seconds(delay)
-                    # update score
-                    old_score = new_score
-                    replay(team_id)
-                    alert.activate_goal_audio()
-                    
+            '''Detect if score changed...'''
+            if ((home_score > old_home_score) and (team_id is home_team_ID)) or ((away_score > old_away_score) and (team_id is away_team_ID)):
+                LabelDesc2["text"] = "GOAL!"
+                old_home_score = home_score
+                old_away_score = away_score
+                old_score = new_score
+                alert.activate_goal_audio()
+                schedule.every(90).seconds.do(replay, content_team_id=team_id)
+                #schedule.every(30).seconds.at_time(time.noe + 2 mins).do(replay, content_team_id=team_id) #schedule in 2mins to run every 30secs 
+                print('scored***')
+                
+            if (home_score < old_home_score) or (away_score < old_away_score):
+                #score error, score decreased somehow
+                old_home_score = home_score
+                old_away_score = away_score
+                
 
     elif ('Final' in game_status) or ('Game Over' in game_status):
         updateSpeed = int(30*60*1000) # 30mins
@@ -448,33 +478,31 @@ def update():
         #put something here for game ended, team won
         
         '''Update GUI info'''
-        '''
-        LabelAwayScore["text"] = away_score
-        LabelHomeScore["text"] = home_score
-        LabelAwayName["text"] = away_team
-        LabelHomeName["text"] = home_team
-        if (team_id == away_team_ID): #if myteam's ID is away team and they win or lost
-            if (old_away_score > old_home_score):
-                LabelDesc1["text"] = '{0} status is {1}. {0} won!'.format(myTeam, game_status)
-                alert.activate_audio('Another One Bites The Dust')
-            else:
-                LabelDesc1["text"] = '{0} status is {1}. {0} lost!'.format(myTeam, game_status)
-        elif (team_id == home_team_ID): #if myteam's ID is away team and they win or lost
-            if (old_home_score > old_away_score):
-                LabelDesc1["text"] = '{0} status is {1}. {0} won!!!'.format(myTeam, game_status)
-                alert.activate_audio('Another One Bites The Dust')
-            else:
-                LabelDesc1["text"] = '{0} status is {1}. {0} lost!!!'.format(myTeam, game_status)
-                print(str(old_home_score) + ',' + str(old_away_score))
-        
-        else:
-            LabelDesc1["text"] = '{0} : {1}. {2} INVALID Result!'.format(myTeam, team_id, game_status)
-        '''
+#         LabelAwayScore["text"] = away_score
+#         LabelHomeScore["text"] = home_score
+#         LabelAwayName["text"] = away_team
+#         LabelHomeName["text"] = home_team
+#         if (team_id == away_team_ID): #if myteam's ID is away team and they win or lost
+#             if (old_away_score > old_home_score):
+#                 LabelDesc1["text"] = '{0} status is {1}. {0} won!'.format(myTeam, game_status)
+#                 alert.activate_audio('Another One Bites The Dust')
+#             else:
+#                 LabelDesc1["text"] = '{0} status is {1}. {0} lost!'.format(myTeam, game_status)
+#         elif (team_id == home_team_ID): #if myteam's ID is away team and they win or lost
+#             if (old_home_score > old_away_score):
+#                 LabelDesc1["text"] = '{0} status is {1}. {0} won!!!'.format(myTeam, game_status)
+#                 alert.activate_audio('Another One Bites The Dust')
+#             else:
+#                 LabelDesc1["text"] = '{0} status is {1}. {0} lost!!!'.format(myTeam, game_status)
+#                 print(str(old_home_score) + ',' + str(old_away_score))
+#         
+#         else:
+#             LabelDesc1["text"] = '{0} : {1}. {2} INVALID Result!'.format(myTeam, team_id, game_status)
 
-            
-        
         LabelDesc1["text"] = ""
         LabelDesc2["text"] = ""
+        LabelDesc3["text"] = ""
+        LabelDesc4["text"] = ""
     
     else:
         print(game_status + ':' + str(updateSpeed) + ". ***invalid state***")
@@ -486,6 +514,10 @@ def update():
     LabelAwayPic.configure(image=away_logo)
     LabelHomePic.image = home_logo
     LabelAwayPic.image = away_logo
+    
+    '''run schedule(s)'''
+    schedule.run_pending()
+    print("scheduled........................")
     
     window.after(updateSpeed, update) #run update function after Xms, must be cancel, idle, info, or an integer
 
@@ -534,17 +566,17 @@ LabelSpareRow2 = Label(mainframe, bg = bgcolor, text="")
 LabelSpareRow3 = Label(mainframe, bg = bgcolor, text="")
 LabelSpareRow4 = Label(mainframe, bg = bgcolor, text="")
 LabelHomeTeam = Label(mainframe, bg = bgcolor, text="Home Team", font=("bold", 16), width=20, padx=3)
-LabelVS = Label(mainframe, bg = bgcolor, text="vs", font=("bold", 24), width=5, padx=1)
+LabelVS = Label(mainframe, bg = bgcolor, text="vs", font=("bold", 24), width=3, padx=1)
 LabelAwayTeam = Label(mainframe, bg = bgcolor, text="Away Team", font=("bold", 16), width=20, padx=3)
 LabelHomeName = Label(mainframe, bg = bgcolor, text="name...", font=("bold", 16), width=22, padx=3)
 LabelAwayName = Label(mainframe, bg = bgcolor, text="name...", font=("bold", 16), width=22, padx=3)
 LabelAwayScore = Label(mainframe, bg = bgcolor, text="-", font=("bold", 80), width=5, padx=1)
 LabelHomeScore = Label(mainframe, bg = bgcolor, text="-", font=("bold", 80), width=5, padx=1)
-LabelDesc0 = Label(mainframe, bg = bgcolor, text="")
-LabelDesc1 = Label(mainframe, bg = bgcolor, text="previous game status...")
-LabelDesc2 = Label(mainframe, bg = bgcolor, text="next game status")
-LabelDesc3 = Label(mainframe, bg = bgcolor, text="")
-LabelDesc4 = Label(mainframe, bg = bgcolor, text="")
+LabelDesc0 = Label(mainframe, bg = bgcolor, text="", font=12)
+LabelDesc1 = Label(mainframe, bg = bgcolor, text="previous game status...", font=12)
+LabelDesc2 = Label(mainframe, bg = bgcolor, text="next game status", font=12)
+LabelDesc3 = Label(mainframe, bg = bgcolor, text="", font=12)
+LabelDesc4 = Label(mainframe, bg = bgcolor, text="", font=12)
 
 LabelCityAway = Label(mainframe, bg = bgcolor, text=" <-Location-> ")
 LabelArenaAway = Label(mainframe, bg = bgcolor, text=" <-Arena-> ")

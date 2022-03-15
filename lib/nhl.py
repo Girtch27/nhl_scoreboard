@@ -40,7 +40,7 @@ def check_game_status(team_id,date):
         return 'No Game'
 
 def fetch_scores(team_id):
-    """ Function to get the score of the game depending on the chosen team.
+    """ Function to get the score of the game depending on the chosen team, home team score, and away team score
     Inputs the team ID and returns the score found on web. """
 
     # Get current time
