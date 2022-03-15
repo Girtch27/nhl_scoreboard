@@ -26,7 +26,7 @@ bgcolor = original_bgcolor #bgcolor used by all widgets
 window['bg']= bgcolor
 
 # window size
-window_width = 1600 #900
+window_width = 1200 #900
 window_height = 600 #600
 
 # get the screen dimension
@@ -108,9 +108,10 @@ myTeam = "Wild"
 myTeam = "Golden Knights"
 myTeam = "Canadiens"
 myTeam = "Stars"
-myTeam = "Maple Leafs"
 myTeam = "Flames"
 myTeam = "Lightning"
+myTeam = "Maple Leafs"
+
 
 
 window.title(myTeam + ' NHL Scoreboard')
@@ -565,18 +566,18 @@ LabelSpareRow1 = Label(mainframe, bg = bgcolor, text="")
 LabelSpareRow2 = Label(mainframe, bg = bgcolor, text="")
 LabelSpareRow3 = Label(mainframe, bg = bgcolor, text="")
 LabelSpareRow4 = Label(mainframe, bg = bgcolor, text="")
-LabelHomeTeam = Label(mainframe, bg = bgcolor, text="Home Team", font=("bold", 16), width=20, padx=3)
-LabelVS = Label(mainframe, bg = bgcolor, text="vs", font=("bold", 24), width=3, padx=1)
-LabelAwayTeam = Label(mainframe, bg = bgcolor, text="Away Team", font=("bold", 16), width=20, padx=3)
+LabelHomeTeam = Label(mainframe, bg = bgcolor, text="Home Team", font=("bold", 16), width=20, padx=1)
+LabelVS = Label(mainframe, bg = bgcolor, text="vs", font=("bold", 24), width=2, padx=1)
+LabelAwayTeam = Label(mainframe, bg = bgcolor, text="Away Team", font=("bold", 16), width=20, padx=1)
 LabelHomeName = Label(mainframe, bg = bgcolor, text="name...", font=("bold", 16), width=22, padx=3)
 LabelAwayName = Label(mainframe, bg = bgcolor, text="name...", font=("bold", 16), width=22, padx=3)
 LabelAwayScore = Label(mainframe, bg = bgcolor, text="-", font=("bold", 80), width=5, padx=1)
 LabelHomeScore = Label(mainframe, bg = bgcolor, text="-", font=("bold", 80), width=5, padx=1)
-LabelDesc0 = Label(mainframe, bg = bgcolor, text="", font=12)
-LabelDesc1 = Label(mainframe, bg = bgcolor, text="previous game status...", font=12)
-LabelDesc2 = Label(mainframe, bg = bgcolor, text="next game status", font=12)
-LabelDesc3 = Label(mainframe, bg = bgcolor, text="", font=12)
-LabelDesc4 = Label(mainframe, bg = bgcolor, text="", font=12)
+LabelDesc0 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
+LabelDesc1 = Label(mainframe, bg = bgcolor, text="previous game status...", font=("normal", 10))
+LabelDesc2 = Label(mainframe, bg = bgcolor, text="next game status", font=("normal", 10))
+LabelDesc3 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
+LabelDesc4 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
 
 LabelCityAway = Label(mainframe, bg = bgcolor, text=" <-Location-> ")
 LabelArenaAway = Label(mainframe, bg = bgcolor, text=" <-Arena-> ")
