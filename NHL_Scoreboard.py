@@ -308,7 +308,7 @@ def replay(content_team_id):
     
     description, highlight_description = media.get_goal_description(content_team_id, content_url)
     if ((description is not "") and (highlight_description is not "")):
-        LabelDesc3["text"] = 'Goal!!! {0}'.format(description)
+        LabelDesc3["text"] = 'Goal! {0}'.format(description)
         #LabelDesc3["text"] = '{0}'.format(highlights_descr[1,2,3]) #us \n for a new line or wrap=WORD from https://www.tutorialspoint.com/how-to-word-wrap-text-in-tkinter-text
         LabelDesc4["text"] = '{0}'.format(highlight_description)
         print("un-scheduled.....................")
