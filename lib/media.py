@@ -54,8 +54,15 @@ def get_goal_description(team_id, url):
     milestones = response['media']['milestones']['items']
         
     for item_type in milestones: #and (team is team_id))
-        if ((item_type['title'] == 'Goal') and (item_type['teamId'] == team_id_str) and (item_type['highlight']['description'] is not "")):
-            description = item_type['description']
-            highlight_description = item_type['highlight']['description']
-            print('Goal by '  + description + ', ' + highlight_description)
+        if ((item_type['title'] == 'Goal') and (item_type['teamId'] == team_id_str)):
+            if 'highlight' in item_type:
+                if 'description' in item_type['highlight']: 
+                    description = item_type['description']
+                    highlight_description = item_type['highlight']['description']
+                    print('Goal by '  + description + ', ' + highlight_description)
+        else:
+            description = ""
+            highlight_description = ""
+
+
     return description, highlight_description
