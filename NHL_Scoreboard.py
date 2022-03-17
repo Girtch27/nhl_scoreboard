@@ -111,6 +111,8 @@ myTeam = "Stars"
 myTeam = "Flames"
 myTeam = "Lightning"
 myTeam = "Maple Leafs"
+myTeam = "Senators"
+
 
 
 
@@ -294,7 +296,7 @@ def replay(content_team_id):
     #content_team_id = "10"
     #content_date = "2022-02-22" #for debug when using local json file
     
-    print('check for media contect...')
+    print('check for media content...')
     #time.sleep(60) #wait 2 mins for media content to be ready
     content_url = media.get_content_url(content_team_id, content_date)
     #print('content_url returned is: ' + content_url)
@@ -474,6 +476,7 @@ def update():
         updateSpeed = int(30*60*1000) # 30mins
         #alert.cleanup()
         gameInfoUpdated = False #update game info flag
+        schedule.CancelJob #cancel schedule until next goal detected, don't want schedule to run during a late game next day
         print (game_status + ':' + str(updateSpeed) + ". Game ended, cleaning up!")
         
         #put something here for game ended, team won
