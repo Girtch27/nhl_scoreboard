@@ -462,6 +462,7 @@ def update():
                 old_away_score = away_score
                 old_score = new_score
                 alert.activate_goal_audio()
+                replay(team_id)
                 schedule.every(90).seconds.do(replay, content_team_id=team_id)
                 #schedule.every(30).seconds.at_time(time.noe + 2 mins).do(replay, content_team_id=team_id) #schedule in 2mins to run every 30secs 
                 print('scored***')
