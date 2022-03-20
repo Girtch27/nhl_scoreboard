@@ -4,6 +4,27 @@ import time
 import datetime
 import schedule
 
+
+''' video stuff '''
+from tkvideo import tkvideo
+#from tkVideoPlayer import TkinterVideo
+
+'''image stuff'''
+#from io import BytesIO
+import cairosvg
+from PIL import ImageTk, Image
+
+''' OS parts '''
+import os
+import datetime
+#import os #used to find config file and\or save status to file
+import pause
+
+'''my library NHL portion'''
+from lib import nhl, alert, media, nhlplayer
+
+
+
 # Creating a GUI Windows
 window = Tk()
 mainframe = ttk.Frame(window, padding="1 1 1 1")
@@ -59,24 +80,6 @@ https://github.com/arim215/nhl_goal_light
 https://github.com/rpi-ws281x/rpi-ws281x-python #get led lights working
 '''
 
-''' video stuff '''
-from tkvideo import tkvideo
-#from tkVideoPlayer import TkinterVideo
-
-'''image stuff'''
-#from io import BytesIO
-import cairosvg
-from PIL import ImageTk, Image
-
-''' OS parts '''
-import os
-import datetime
-#import os #used to find config file and\or save status to file
-import pause
-
-'''my library NHL portion'''
-from lib import nhl, alert, media
-
 ''' Initialize '''
 delay_checked = False #delay_checked
 delay = 0.0 #delay used before starting goal notifications, set to 0 and see if too early compared to TV??
@@ -110,11 +113,17 @@ myTeam = "Canadiens"
 myTeam = "Stars"
 myTeam = "Flames"
 myTeam = "Lightning"
-myTeam = "Maple Leafs"
 myTeam = "Senators"
+myTeam = "Maple Leafs"
 
 
+#my own class NHLPlayer in file player.py
+#from nhlplayer import NHLPlayer
+#player = nhlplayer.NHLPlayer("8478483") #Marner is 8478483, Mathews is 8479318
+#print(player.fullname)
 
+player = nhlplayer.NHLPlayer("8478483")
+print(player.headpic_url)
 
 window.title(myTeam + ' NHL Scoreboard')
 ScoreVerse = "vs"
