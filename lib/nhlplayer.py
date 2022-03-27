@@ -1,5 +1,8 @@
 import requests
+import urllib.request
 import json
+import io
+from PIL import ImageTk, Image
 
 NHL_API_PLAYER_URL = "http://statsapi.web.nhl.com/api/v1/people/"
 # format for Marner is http://statsapi.web.nhl.com/api/v1/people/8478483
@@ -7,8 +10,32 @@ NHL_API_PLAYER_URL = "http://statsapi.web.nhl.com/api/v1/people/"
 NHL_PLAYER_PIC_URL = "https://cms.nhl.bamgrid.com/images/headshots/current/168x168/" 
 # format for Marner is https://cms.nhl.bamgrid.com/images/headshots/current/168x168/8478483.jpg
 
+NHL_API_ROSTER_URL = "https://statsapi.web.nhl.com/api/v1/teams/10?expand=team.roster"
+# format for team roster URL is https://statsapi.web.nhl.com/api/v1/teams/10?expand=team.roster
+
 #response = requests.get(NHL_API_URL + ID).json()
 #print('player url: ' + NHL_API_PLAYER_URL)
+class NHLRoster:
+    def __init__(self, TeamID):
+        NHL_API_ROSTER_URL = "https://statsapi.web.nhl.com/api/v1/teams/"
+        NHL_API_ROSTER_URL = NHL_API_ROSTER_URL + TeamID + "?expand=team.roster"
+        
+        response = requests.get(NHL_API_ROSTER_URL).json()
+        players = response['teams'][0]['roster']['roster']
+
+        for playerID in players:
+            #self.rosterIDs = players['person']['id']
+            #print(players['person']['id'])
+            self.rosterID = playerID['person']
+            #print(playerID['person']['id'])
+
+    def get_rosterIDs(self):
+        return self.rosterIDs
+    
+    def get_roster(self):
+        return self.roster
+
+        
 
 class NHLPlayer:
 
@@ -31,8 +58,14 @@ class NHLPlayer:
         self.hand = response['people'][0]['shootsCatches']
         self.position = response['people'][0]['primaryPosition']['abbreviation']
         self.size = str(response['people'][0]['height']) + ', ' + str(response['people'][0]['weight']) + 'lbs'
-        self.headpic_url = NHL_PLAYER_PIC_URL
-
+        self.headpic_url = NHL_PLAYER_PIC_URL  
+        
+        with urllib.request.urlopen(NHL_PLAYER_PIC_URL) as u:
+            raw_data = u.read()
+        #self.image = tk.PhotoImage(data=base64.encodebytes(raw_data))
+        image = Image.open(io.BytesIO(raw_data))
+        self.image = ImageTk.PhotoImage(image)
+        
     def get_firstname(self):
         return self.firstname
 
@@ -66,6 +99,15 @@ class NHLPlayer:
     def get_headpic_url(self):
         return self.headpic_url
     
+    def get_image(self):
+        return self.image
+
+
+TeamID = "10"
+player = NHLRoster(TeamID)
+#print("print roster info: " + str(player.rosterIDs()))
+
+
 ''' test
 player = NHLPlayer("8478483")
 print(player.firstname)

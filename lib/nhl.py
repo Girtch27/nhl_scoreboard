@@ -237,7 +237,7 @@ def get_teams():
     return teams
 
 
-def get_logos():
+def get_logos(team_name):
     """ Function to get team_ID number then return team logo
         #https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/10.svg   TML logo"""
 

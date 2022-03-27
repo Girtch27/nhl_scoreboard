@@ -41,7 +41,7 @@ def get_video_url(team_id, url):
             highlight_description = item_type['highlight']['description']
             highlight_videoURL = item_type['highlight']['playbacks'][0]['url'] #0 url for 320x180, 2 is 640x360
             print('Goal video url '  + highlight_videoURL)
-            
+
     return highlight_videoURL
 
 def get_goal_description(team_id, url):
@@ -49,6 +49,7 @@ def get_goal_description(team_id, url):
     """ returns only the last goal info"""
     description = ""
     highlight_description = ""
+    playerID = ""
     team_id_str = str(team_id)
     response = requests.get(url).json()
     milestones = response['media']['milestones']['items']
@@ -60,6 +61,7 @@ def get_goal_description(team_id, url):
                     if item_type['description'] is not "" and item_type['highlight']['description'] is not "":
                         description = item_type['description']
                         highlight_description = item_type['highlight']['description']
+                        playerID = item_type['playerId']
                         print('Goal by '  + description + ', ' + highlight_description)
         
-    return description, highlight_description
+    return description, highlight_description, playerID

@@ -23,8 +23,6 @@ import pause
 '''my library NHL portion'''
 from lib import nhl, alert, media, nhlplayer
 
-
-
 # Creating a GUI Windows
 window = Tk()
 mainframe = ttk.Frame(window, padding="1 1 1 1")
@@ -102,28 +100,63 @@ season = False #season
 home_logo = PhotoImage(file="/home/pi/nhl_scoreboard/images/PNG/NHL.png")
 away_logo = PhotoImage(file="/home/pi/nhl_scoreboard/images/PNG/NHL.png")
 
-#myTeam is the team I want to follow
-myTeam = "Hurricanes"
-myTeam = "Rangers"
-myTeam = "Panthers"
-myTeam = "Sharks"
-myTeam = "Wild"
-myTeam = "Golden Knights"
-myTeam = "Canadiens"
-myTeam = "Stars"
-myTeam = "Flames"
-myTeam = "Lightning"
-myTeam = "Senators"
-myTeam = "Maple Leafs"
-
-
 #my own class NHLPlayer in file player.py
 #from nhlplayer import NHLPlayer
 #player = nhlplayer.NHLPlayer("8478483") #Marner is 8478483, Mathews is 8479318
 #print(player.fullname)
 
-player = nhlplayer.NHLPlayer("8478483")
-print(player.headpic_url)
+
+playerID1 = "8478483" #mitch
+playerID2 = "8478047" #bunting
+playerID3 = "8479318" #mathews
+playerID4 = "8477939"
+
+#default
+player = nhlplayer.NHLPlayer(playerID3)
+player_pic = player.get_image()
+#LabelPlayerPic = player_pic #load a default image
+
+player1 = nhlplayer.NHLPlayer(playerID1)
+player_pic1 = player1.get_image()
+#print(player1.get_fullname())
+#print(player1.get_size())
+#print(player1.get_position())
+
+player2 = nhlplayer.NHLPlayer(playerID2)
+player_pic2 = player2.get_image()
+#print(player2.get_fullname())
+#print(player2.get_size())
+#print(player2.get_position())
+
+player3 = nhlplayer.NHLPlayer(playerID3)
+player_pic3 = player3.get_image()
+#print(player3.get_fullname())
+#print(player3.get_size())
+#print(player3.get_position())
+
+player4 = nhlplayer.NHLPlayer(playerID4)
+player_pic4 = player3.get_image()
+#print(player4.get_fullname())
+#print(player4.get_size())
+#print(player4.get_position())
+
+
+#myTeam is the team I want to follow
+myTeam = "Hurricanes"
+myTeam = "Panthers"
+myTeam = "Rangers"
+myTeam = "Sharks"
+myTeam = "Wild"
+myTeam = "Golden Knights"
+myTeam = "Canadiens"
+myTeam = "Stars"
+myTeam = "Lightning"
+myTeam = "Senators"
+myTeam = "Maple Leafs"
+myTeam = "Flames"
+myTeam = "Lightning"
+
+
 
 window.title(myTeam + ' NHL Scoreboard')
 ScoreVerse = "vs"
@@ -177,13 +210,14 @@ def utilsVideo():
     #print('info returned is ' + description + highlight_description + video_url)
     player = tkvideo(video_url, video_label, loop = 0, size = (320, 180), hz = 60)
     player.play()
-    description, highlight_description = media.get_goal_description(content_team_id, content_url)
+    description, highlight_description, playerID = media.get_goal_description(content_team_id, content_url)
     highlights_descr = []
     highlights_descr = highlight_description.split(" ")
     LabelDesc3["text"] = 'Goal!!! {0}'.format(description)
     #LabelDesc3["text"] = '{0}'.format(highlights_descr[1,2,3]) #us \n for a new line or wrap=WORD from https://www.tutorialspoint.com/how-to-word-wrap-text-in-tkinter-text
-    LabelDesc4["text"] = '{0}'.format(highlight_description)
-    
+    LabelDesc4["text"] = '{0}'.format(highlight_description1)
+    LabelDesc5["text"] = '{0}'.format(highlight_description2)
+
     
 def utilsVideoStop():
     #video_label.pack_forget()
@@ -294,6 +328,18 @@ def utilsImgtoPNG():
             print(name)
             #cairosvg.svg2png(url='https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/1.svg',write_to=name+'/home/pi/nhl_scoreboard/images/y.png')
             cairosvg.svg2png(url=drSVG+name+'.svg',write_to=drPNG+name+'.png',parent_width=img_width, parent_height=img_height)
+   
+def split(string_to_split):
+    #take a string that is too long and split into 2 smaller strings
+    midpos = string_to_split.rindex(" ", 0, 40)
+    string1 = slice(0, midpos, 1)
+    string2 = slice(midpos, 80, 1)
+    line1 = (string_to_split[string1])
+    line2 = (string_to_split[string2] + "...")
+    line2 = line2.lstrip()
+    return Line1, Line2
+        
+
 
 def replay(content_team_id):
 #def replay():
@@ -316,17 +362,27 @@ def replay(content_team_id):
     player = tkvideo(video_url, video_label, loop = 0, size = (320, 180), hz = 60)
     player.play()
     '''
-    
-    description, highlight_description = media.get_goal_description(content_team_id, content_url)
+
+
+    description, highlight_description, playerID = media.get_goal_description(content_team_id, content_url)
     if ((description is not "") and (highlight_description is not "")):
         LabelDesc3["text"] = 'Goal! {0}'.format(description)
         #LabelDesc3["text"] = '{0}'.format(highlights_descr[1,2,3]) #us \n for a new line or wrap=WORD from https://www.tutorialspoint.com/how-to-word-wrap-text-in-tkinter-text
-        LabelDesc4["text"] = '{0}'.format(highlight_description)
+        
+        #split returned description to two lines
+        highlight_description1, highlight_description2 = split(highlight_description)
+        
+        LabelDesc4["text"] = '{0}'.format(highlight_description1)
+        LabelDesc5["text"] = '{0}'.format(highlight_description2)
+        player = nhlplayer.NHLPlayer(playerID)
+        LabelPlayerPic = player.get_image()
         print("un-scheduled.....................")
         return schedule.CancelJob #cancel schedule until next goal detected
     else:
         LabelDesc3["text"] = 'Getting goal and {0}'.format(description)
         LabelDesc4["text"] = 'highlights info... {0}'.format(highlight_description)
+    
+    
 
 def update():
     global bgcolor #background colour
@@ -395,6 +451,8 @@ def update():
             LabelDesc2["text"] = '{0} next game is {1}'.format(myTeam, next_game_date_12hr)
         LabelDesc3["text"] = ""
         LabelDesc4["text"] = ""
+        LabelDesc5["text"] = ""
+
                 
     elif ('Scheduled' in game_status):
         #game later today, find next game info
@@ -414,6 +472,8 @@ def update():
         LabelDesc2["text"] = '{0} next game is TODAY! {1}'.format(myTeam, next_game_date_12hr)
         LabelDesc3["text"] = ""
         LabelDesc4["text"] = ""
+        LabelDesc5["text"] = ""
+
 
     elif ('In Progress' in game_status) or ('Pre-Game' in game_status):
         new_score, home_score, away_score  = nhl.fetch_scores(team_id)
@@ -428,6 +488,8 @@ def update():
             LabelDesc2["text"] = ""
             LabelDesc3["text"] = ""
             LabelDesc4["text"] = ""
+            LabelDesc5["text"] = ""
+
             
         else:
             LabelAwayName["text"] = away_team
@@ -517,6 +579,8 @@ def update():
         LabelDesc2["text"] = ""
         LabelDesc3["text"] = ""
         LabelDesc4["text"] = ""
+        LabelDesc5["text"] = ""
+
     
     else:
         print(game_status + ':' + str(updateSpeed) + ". ***invalid state***")
@@ -528,6 +592,8 @@ def update():
     LabelAwayPic.configure(image=away_logo)
     LabelHomePic.image = home_logo
     LabelAwayPic.image = away_logo
+    LabelPlayerPic.configure(image=player_pic)
+    LabelPlayerPic.image = player_pic
     
     '''run schedule(s)'''
     schedule.run_pending()
@@ -591,6 +657,8 @@ LabelDesc1 = Label(mainframe, bg = bgcolor, text="previous game status...", font
 LabelDesc2 = Label(mainframe, bg = bgcolor, text="next game status", font=("normal", 10))
 LabelDesc3 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
 LabelDesc4 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
+LabelDesc5 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
+
 
 LabelCityAway = Label(mainframe, bg = bgcolor, text=" <-Location-> ")
 LabelArenaAway = Label(mainframe, bg = bgcolor, text=" <-Arena-> ")
@@ -610,6 +678,9 @@ LabelHomePic = Label(mainframe, bg = bgcolor, image=home_logo)
 LabelMediaText = Label(mainframe, bg = bgcolor, text="Game Info | Status | Highlights", font=("bold", 16), width=25, padx=2)
 LabelMedia = Label(mainframe, bg = bgcolor, image=home_logo)
 
+LabelPlayerPic = Label(mainframe, bg = bgcolor, image=player_pic)
+
+
 #buttonStart = Button(window, text="Start", command=update)
 buttonExit = Button(mainframe, bg = bgcolor, text="Exit", command=exit) #special command to exit & shutdown?
 #buttonVerify = Button(window, text="Verify Team", command=setup) #special command to exit & shutdown?
@@ -617,49 +688,42 @@ buttonExit = Button(mainframe, bg = bgcolor, text="Exit", command=exit) #special
 
 '''define widget's grid layout'''
 LabelSpareRow1.grid(row=0, column=0) #spare
-LabelHomeTeam.grid(row=1, column=0)
-LabelHomeName.grid(row=2, column=0)
-LabelHomeScore.grid(row=3, column=0)
-LabelHomePic.grid(row=5, column=0)
-LabelCityHome.grid(row=6, column=0)
-LabelArenaHome.grid(row=7, column=0)
-LabelHistoryHome.grid(row=8, column=0)
-LabelDivisionHome.grid(row=9, column=0)
-LabelConferenceHome.grid(row=10, column=0)
-LabelRecordHome.grid(row=11, column=0)
+LabelAwayTeam.grid(row=1, column=0)
+LabelAwayName.grid(row=2, column=0)
+LabelAwayScore.grid(row=3, column=0)
+LabelAwayPic.grid(row=5, column=0)
+LabelCityAway.grid(row=6, column=0)
+LabelArenaAway.grid(row=7, column=0)
+LabelHistoryAway.grid(row=8, column=0)
+LabelDivisionAway.grid(row=9, column=0)
+LabelConferenceAway.grid(row=10, column=0)
+LabelRecordAway.grid(row=11, column=0)
 
 LabelVS.grid(row=2, column=1)
 
-LabelAwayTeam.grid(row=1, column=2)
-LabelAwayName.grid(row=2, column=2)
-LabelAwayScore.grid(row=3, column=2)
-LabelAwayPic.grid(row=5, column=2)
-LabelCityAway.grid(row=6, column=2)
-LabelArenaAway.grid(row=7, column=2)
-LabelHistoryAway.grid(row=8, column=2)
-LabelDivisionAway.grid(row=9, column=2)
-LabelConferenceAway.grid(row=10, column=2)
-LabelRecordAway.grid(row=11, column=2)
+LabelHomeTeam.grid(row=1, column=2)
+LabelHomeName.grid(row=2, column=2)
+LabelHomeScore.grid(row=3, column=2)
+LabelHomePic.grid(row=5, column=2)
+LabelCityHome.grid(row=6, column=2)
+LabelArenaHome.grid(row=7, column=2)
+LabelHistoryHome.grid(row=8, column=2)
+LabelDivisionHome.grid(row=9, column=2)
+LabelConferenceHome.grid(row=10, column=2)
+LabelRecordHome.grid(row=11, column=2)
 
 SepVert.grid(row=1, column=3, rowspan=12, sticky=NS)
 
 LabelMediaText.grid(row=1, column=4, padx=2, sticky=W)
 LabelMedia.grid(row=3, column=4, padx=5, rowspan=2, sticky=W)
 LabelDesc0.grid(row=2, column=4, padx=5, sticky=W)
+LabelPlayerPic.grid(row=5, column=4)
 LabelDesc1.grid(row=6, column=4, padx=5, sticky=W)
 LabelDesc2.grid(row=7, column=4, padx=5, sticky=W)
 LabelDesc3.grid(row=8, column=4, padx=5, sticky=W)
 LabelDesc4.grid(row=9, column=4, padx=5, sticky=W)
-#LabelSpareRow2.grid(row=4, column=0) #spare
-#LabelDesc2.grid(row=6, column=0, columnspan=2)
-#LabelDesc3.grid(row=7, column=0, columnspan=2)
-#LabelSpareRow3.grid(row=8, column=0) #spare
-#buttonVerify.grid(row=9, column=1)
-#LabelHomePic.grid(row=5, column=0, rowspan=5)
-#LabelMedia.grid(row=12, column=3, rowspan=10, columnspan=1)
-#LabelMedia.grid(row=3, column=4, rowspan=2, sticky=NSEW)
-#buttonStart.grid(row=24, column=0)
-#buttonExit.grid(row=24, column=3)
+LabelDesc5.grid(row=9, column=4, padx=5, sticky=W)
+
 
 LabelSpareRow4.grid(row=17, column=0) #spare
 '''define widget's grid layout'''
