@@ -152,9 +152,10 @@ myTeam = "Canadiens"
 myTeam = "Stars"
 myTeam = "Lightning"
 myTeam = "Senators"
-myTeam = "Maple Leafs"
 myTeam = "Flames"
 myTeam = "Lightning"
+myTeam = "Maple Leafs"
+
 
 
 
@@ -211,10 +212,8 @@ def utilsVideo():
     player = tkvideo(video_url, video_label, loop = 0, size = (320, 180), hz = 60)
     player.play()
     description, highlight_description, playerID = media.get_goal_description(content_team_id, content_url)
-    highlights_descr = []
-    highlights_descr = highlight_description.split(" ")
+    highlight_description1, highlight_description2 = split(highlight_description)
     LabelDesc3["text"] = 'Goal!!! {0}'.format(description)
-    #LabelDesc3["text"] = '{0}'.format(highlights_descr[1,2,3]) #us \n for a new line or wrap=WORD from https://www.tutorialspoint.com/how-to-word-wrap-text-in-tkinter-text
     LabelDesc4["text"] = '{0}'.format(highlight_description1)
     LabelDesc5["text"] = '{0}'.format(highlight_description2)
 
@@ -331,13 +330,20 @@ def utilsImgtoPNG():
    
 def split(string_to_split):
     #take a string that is too long and split into 2 smaller strings
-    midpos = string_to_split.rindex(" ", 0, 40)
-    string1 = slice(0, midpos, 1)
-    string2 = slice(midpos, 80, 1)
-    line1 = (string_to_split[string1])
-    line2 = (string_to_split[string2] + "...")
-    line2 = line2.lstrip()
-    return Line1, Line2
+    line1 = ""
+    line2 = ""
+    length = 77
+    if len(string_to_split) > length: #split long desc into two lines
+        midpos = string_to_split.rindex(" ", 0, length + 1)
+        string1 = slice(0, midpos, 1) 
+        string2 = slice(midpos, 165, 1)
+        line1 = (string_to_split[string1])
+        line2 = (string_to_split[string2] + "...")
+        line2 = line2.lstrip()
+    else: # keep short strings into 1 desc
+        line1  = string_to_split
+        line2 =  ""
+    return line1, line2
         
 
 
@@ -371,7 +377,6 @@ def replay(content_team_id):
         
         #split returned description to two lines
         highlight_description1, highlight_description2 = split(highlight_description)
-        
         LabelDesc4["text"] = '{0}'.format(highlight_description1)
         LabelDesc5["text"] = '{0}'.format(highlight_description2)
         player = nhlplayer.NHLPlayer(playerID)
@@ -380,8 +385,9 @@ def replay(content_team_id):
         return schedule.CancelJob #cancel schedule until next goal detected
     else:
         LabelDesc3["text"] = 'Getting goal and {0}'.format(description)
-        LabelDesc4["text"] = 'highlights info... {0}'.format(highlight_description)
-    
+        LabelDesc4["text"] = 'highlights info {0}'.format(highlight_description1)
+        LabelDesc5["text"] = '... {0}'.format(highlight_description2)
+   
     
 
 def update():
@@ -722,7 +728,7 @@ LabelDesc1.grid(row=6, column=4, padx=5, sticky=W)
 LabelDesc2.grid(row=7, column=4, padx=5, sticky=W)
 LabelDesc3.grid(row=8, column=4, padx=5, sticky=W)
 LabelDesc4.grid(row=9, column=4, padx=5, sticky=W)
-LabelDesc5.grid(row=9, column=4, padx=5, sticky=W)
+LabelDesc5.grid(row=10, column=4, padx=5, sticky=W)
 
 
 LabelSpareRow4.grid(row=17, column=0) #spare
