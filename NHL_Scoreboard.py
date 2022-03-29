@@ -37,6 +37,7 @@ window.title("NHL Scoreboard") #gets changed below after Team to follow is deter
 bgcolorDefault = window.cget("background") #get default color to store to later change back too
 window.configure(background=bgcolorDefault) #set back to default color
 
+original_bgcolor = "white"
 original_bgcolor = "light grey" #original_bgcolor is user selected color
 original_bgcolor = "light blue" #original_bgcolor is user selected color
 original_bgcolor = bgcolorDefault #original_bgcolor is user selected color
@@ -57,11 +58,13 @@ offset_x = 0 #350, set to 0 to be center or XXX to shift over
 offset_y = 0 #set to 0 to center or YYY to shift over
 center_x = int((screen_width/2 - window_width/2) + offset_x)
 center_y = int((screen_height/2 - window_height/2) + offset_y)
-
-
 # set the position of the window to the center of the screen, window.geometry("800x600+200+200")
 #window.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-window.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
+window.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}") #centred windowed size set above
+
+#full sized window based on screen size
+window.geometry(f"{screen_width}x{screen_height}+{0}+{0}") #full sized window based on screen size
+
 
 content_date = datetime.date.today()
 content_date = content_date.strftime('%Y-%m-%d') #format should end us as "2022-02-22"
@@ -112,8 +115,8 @@ playerID3 = "8479318" #mathews
 playerID4 = "8477939"
 
 #default
-player = nhlplayer.NHLPlayer(playerID3)
-player_pic = player.get_image()
+skater = nhlplayer.NHLPlayer(playerID3)
+player_pic = skater.get_image()
 #LabelPlayerPic = player_pic #load a default image
 
 player1 = nhlplayer.NHLPlayer(playerID1)
@@ -155,6 +158,8 @@ myTeam = "Senators"
 myTeam = "Flames"
 myTeam = "Lightning"
 myTeam = "Maple Leafs"
+myTeam = "Oilers"
+
 
 
 
@@ -345,10 +350,10 @@ def split(string_to_split):
         line2 =  ""
     return line1, line2
         
-
-
-def replay(content_team_id):
-#def replay():
+def get_goal_info(content_team_id):
+#def get_goal_info():
+    global player_pic
+    global new_score
     video_label = LabelMedia
     
     content_date = datetime.date.today()
@@ -369,26 +374,27 @@ def replay(content_team_id):
     player.play()
     '''
 
-
-    description, highlight_description, playerID = media.get_goal_description(content_team_id, content_url)
+    description, highlight_description, playerID, goal_count = media.get_goal_description(content_team_id, content_url)
     if ((description is not "") and (highlight_description is not "")):
-        LabelDesc3["text"] = 'Goal! {0}'.format(description)
+        LabelDesc3["text"] = 'Goal {0}! {1}'.format(goal_count, description)
         #LabelDesc3["text"] = '{0}'.format(highlights_descr[1,2,3]) #us \n for a new line or wrap=WORD from https://www.tutorialspoint.com/how-to-word-wrap-text-in-tkinter-text
         
         #split returned description to two lines
         highlight_description1, highlight_description2 = split(highlight_description)
         LabelDesc4["text"] = '{0}'.format(highlight_description1)
         LabelDesc5["text"] = '{0}'.format(highlight_description2)
-        player = nhlplayer.NHLPlayer(playerID)
-        LabelPlayerPic = player.get_image()
-        print("un-scheduled.....................")
-        return schedule.CancelJob #cancel schedule until next goal detected
+        skater = nhlplayer.NHLPlayer(playerID)
+        player_pic = skater.get_image()
+        if goal_count == new_score:
+            print("cancel schedule................... " + str(goal_count))
+            return schedule.CancelJob #cancel schedule if all goal descriptions returned until next goal detected
+        print("keep schedule running................... " + str(goal_count))
+
     else:
-        LabelDesc3["text"] = 'Getting goal and {0}'.format(description)
-        LabelDesc4["text"] = 'highlights info {0}'.format(highlight_description1)
-        LabelDesc5["text"] = '... {0}'.format(highlight_description2)
+        LabelDesc3["text"] = 'Getting goal info ... '.format()
+        LabelDesc4["text"] = ''.format()
+        LabelDesc5["text"] = ''.format()
    
-    
 
 def update():
     global bgcolor #background colour
@@ -426,7 +432,7 @@ def update():
         print('Game info updated. ' +  ' Home:' + str(home_team) + str(home_team_ID) + ', Away: ' + str(away_team) + str(away_team_ID))
             
     if ('No Game' in game_status):
-        #replay(team_id)
+        #get_goal_info(team_id)
         
         #no game today, find next game info  
         home_team, home_team_ID, away_team, away_team_ID, nextGameDate = nhl.get_next_game_info2(team_id)
@@ -496,7 +502,6 @@ def update():
             LabelDesc4["text"] = ""
             LabelDesc5["text"] = ""
 
-            
         else:
             LabelAwayName["text"] = away_team
             LabelHomeName["text"] = home_team
@@ -509,29 +514,6 @@ def update():
             LabelAwayScore["text"] = away_score
             LabelHomeScore["text"] = home_score
              
-#            '''Detect if score changed...'''
-#             if (home_score > old_home_score):
-#                 LabelHomeScore["text"] = home_score
-#                 if (team_id is home_team_ID):
-#                     LabelDesc2["text"] = "GOAL!"
-#                     old_home_score = home_score
-#                     pause.seconds(delay)
-#                     # update score
-#                     old_score = new_score
-#                     replay(team_id)
-#                     alert.activate_goal_audio()
-#                     
-#             if (away_score > old_away_score):
-#                 LabelAwayScore["text"] = away_score
-#                 if (team_id is away_team_ID):
-#                     LabelDesc2["text"] = "GOAL!"
-#                     old_away_score = away_score
-#                     pause.seconds(delay)
-#                     # update score
-#                     old_score = new_score
-#                     replay(team_id)
-#                     alert.activate_goal_audio()
-
             '''Detect if score changed...'''
             if ((home_score > old_home_score) and (team_id is home_team_ID)) or ((away_score > old_away_score) and (team_id is away_team_ID)):
                 LabelDesc2["text"] = "GOAL!"
@@ -539,10 +521,10 @@ def update():
                 old_away_score = away_score
                 old_score = new_score
                 alert.activate_goal_audio()
-                replay(team_id)
-                schedule.every(90).seconds.do(replay, content_team_id=team_id)
-                #schedule.every(30).seconds.at_time(time.noe + 2 mins).do(replay, content_team_id=team_id) #schedule in 2mins to run every 30secs 
-                print('scored***')
+                get_goal_info(team_id)
+                schedule.every(90).seconds.do(get_goal_info, content_team_id=team_id)
+                #schedule.every(30).seconds.at_time(time.noe + 2 mins).do(get_goal_info, content_team_id=team_id) #schedule in 2mins to run every 30secs 
+                print('goal detected.....')
                 
             if (home_score < old_home_score) or (away_score < old_away_score):
                 #score error, score decreased somehow
@@ -603,7 +585,7 @@ def update():
     
     '''run schedule(s)'''
     schedule.run_pending()
-    print("scheduled........................")
+    print("run pending schedules...")
     
     window.after(updateSpeed, update) #run update function after Xms, must be cancel, idle, info, or an integer
 
@@ -723,7 +705,7 @@ SepVert.grid(row=1, column=3, rowspan=12, sticky=NS)
 LabelMediaText.grid(row=1, column=4, padx=2, sticky=W)
 LabelMedia.grid(row=3, column=4, padx=5, rowspan=2, sticky=W)
 LabelDesc0.grid(row=2, column=4, padx=5, sticky=W)
-LabelPlayerPic.grid(row=5, column=4)
+LabelPlayerPic.grid(row=5, column=4, sticky=W)
 LabelDesc1.grid(row=6, column=4, padx=5, sticky=W)
 LabelDesc2.grid(row=7, column=4, padx=5, sticky=W)
 LabelDesc3.grid(row=8, column=4, padx=5, sticky=W)

@@ -47,6 +47,7 @@ def get_video_url(team_id, url):
 def get_goal_description(team_id, url):
     """ Function to get all goal's descriptions and video highlight video URL for team_ID at url"""
     """ returns only the last goal info"""
+    goal_count = 0
     description = ""
     highlight_description = ""
     playerID = ""
@@ -59,9 +60,10 @@ def get_goal_description(team_id, url):
             if 'highlight' in item_type:
                 if 'description' in item_type['highlight']:
                     if item_type['description'] is not "" and item_type['highlight']['description'] is not "":
+                        goal_count = goal_count + 1 #used by calling code to check if all goal info are ready
                         description = item_type['description']
                         highlight_description = item_type['highlight']['description']
                         playerID = item_type['playerId']
                         print('Goal by '  + description + ', ' + highlight_description)
         
-    return description, highlight_description, playerID
+    return description, highlight_description, playerID, goal_count

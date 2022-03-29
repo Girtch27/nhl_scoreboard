@@ -40,7 +40,7 @@ class NHLRoster:
 class NHLPlayer:
 
     def __init__(self, ID):
-        NHL_PLAYER_PIC_URL = NHL_PLAYER_PIC_URL = "https://cms.nhl.bamgrid.com/images/headshots/current/168x168/"
+        NHL_PLAYER_PIC_URL = "https://cms.nhl.bamgrid.com/images/headshots/current/168x168/"
         NHL_PLAYER_PIC_URL = NHL_PLAYER_PIC_URL + ID + ".jpg"
 
         NHL_API_PLAYER_URL = "http://statsapi.web.nhl.com/api/v1/people/"
