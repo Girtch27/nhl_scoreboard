@@ -157,10 +157,8 @@ myTeam = "Lightning"
 myTeam = "Senators"
 myTeam = "Flames"
 myTeam = "Lightning"
-myTeam = "Maple Leafs"
 myTeam = "Oilers"
-
-
+myTeam = "Maple Leafs" #default
 
 
 
@@ -416,12 +414,14 @@ def update():
     global away_logo
     global away_team_ID
     global home_team_ID
-    
-        
+
+           
     '''get info from NHL.com'''
     #print (game_status)
     team_id = nhl.get_team_id(myTeam)
+
     today = datetime.date.today()
+
     game_status = nhl.check_game_status(team_id,today) #send team_id and today's date, get back game status
         
     if (gameInfoUpdated is False): #update game info
