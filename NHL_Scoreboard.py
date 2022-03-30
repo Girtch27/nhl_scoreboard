@@ -31,6 +31,15 @@ window.columnconfigure(0, weight=1)
 window.rowconfigure(0, weight=1)
 #window_popup = Tk()
 
+# Create right pane
+main = ttk.PanedWindow(mainframe)
+main.grid(row=5, column=5, sticky="nsew")
+right_pane = ttk.Frame(main, width=100)
+#left_pane = ttk.PanedWindow(main, background="#99fb99", width=200)
+#main.add(left_pane)
+main.add(right_pane)
+
+
 window.title("NHL Scoreboard") #gets changed below after Team to follow is determined
 
 #set window color
@@ -109,40 +118,16 @@ away_logo = PhotoImage(file="/home/pi/nhl_scoreboard/images/PNG/NHL.png")
 #print(player.fullname)
 
 
-playerID1 = "8478483" #mitch
-playerID2 = "8478047" #bunting
-playerID3 = "8479318" #mathews
+MM16 = "8478483" #mitch
+AM34 = "8479318" #mathews
+JT91 = "" #taveras
+playerID1 = "8478047" #bunting
 playerID4 = "8477939"
 
 #default
-skater = nhlplayer.NHLPlayer(playerID3)
-player_pic = skater.get_image()
-#LabelPlayerPic = player_pic #load a default image
-
-player1 = nhlplayer.NHLPlayer(playerID1)
-player_pic1 = player1.get_image()
-#print(player1.get_fullname())
-#print(player1.get_size())
-#print(player1.get_position())
-
-player2 = nhlplayer.NHLPlayer(playerID2)
-player_pic2 = player2.get_image()
-#print(player2.get_fullname())
-#print(player2.get_size())
-#print(player2.get_position())
-
-player3 = nhlplayer.NHLPlayer(playerID3)
-player_pic3 = player3.get_image()
-#print(player3.get_fullname())
-#print(player3.get_size())
-#print(player3.get_position())
-
-player4 = nhlplayer.NHLPlayer(playerID4)
-player_pic4 = player3.get_image()
-#print(player4.get_fullname())
-#print(player4.get_size())
-#print(player4.get_position())
-
+skater = nhlplayer.NHLPlayer(MM16)
+print(skater.fullname)
+print(skater.size)
 
 #myTeam is the team I want to follow
 myTeam = "Hurricanes"
@@ -350,7 +335,7 @@ def split(string_to_split):
         
 def get_goal_info(content_team_id):
 #def get_goal_info():
-    global player_pic
+    global skater
     global new_score
     video_label = LabelMedia
     
@@ -382,7 +367,6 @@ def get_goal_info(content_team_id):
         LabelDesc4["text"] = '{0}'.format(highlight_description1)
         LabelDesc5["text"] = '{0}'.format(highlight_description2)
         skater = nhlplayer.NHLPlayer(playerID)
-        player_pic = skater.get_image()
         if goal_count == new_score:
             print("cancel schedule................... " + str(goal_count))
             return schedule.CancelJob #cancel schedule if all goal descriptions returned until next goal detected
@@ -580,8 +564,8 @@ def update():
     LabelAwayPic.configure(image=away_logo)
     LabelHomePic.image = home_logo
     LabelAwayPic.image = away_logo
-    LabelPlayerPic.configure(image=player_pic)
-    LabelPlayerPic.image = player_pic
+    LabelPlayerPic.configure(image=skater.image)
+    LabelPlayerPic.image = skater.image
     
     '''run schedule(s)'''
     schedule.run_pending()
@@ -647,7 +631,6 @@ LabelDesc3 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
 LabelDesc4 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
 LabelDesc5 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
 
-
 LabelCityAway = Label(mainframe, bg = bgcolor, text=" <-Location-> ")
 LabelArenaAway = Label(mainframe, bg = bgcolor, text=" <-Arena-> ")
 LabelHistoryAway = Label(mainframe, bg = bgcolor, text=" <-Franchise Year-> ")
@@ -666,7 +649,15 @@ LabelHomePic = Label(mainframe, bg = bgcolor, image=home_logo)
 LabelMediaText = Label(mainframe, bg = bgcolor, text="Game Info | Status | Highlights", font=("bold", 16), width=25, padx=2)
 LabelMedia = Label(mainframe, bg = bgcolor, image=home_logo)
 
-LabelPlayerPic = Label(mainframe, bg = bgcolor, image=player_pic)
+LabelPlayerPic = Label(mainframe, bg = bgcolor, image=skater.image)
+LabelPlayerDesc1 = Label(right_pane, bg = bgcolor, text=skater.fullname, font=("bold", 18))
+LabelPlayerDesc2 = Label(right_pane, bg = bgcolor, text=skater.number)
+LabelPlayerDesc3 = Label(right_pane, bg = bgcolor, text=skater.position)
+LabelPlayerDesc4 = Label(right_pane, bg = bgcolor, text=skater.age_bday)
+LabelPlayerDesc5 = Label(right_pane, bg = bgcolor, text=skater.city)
+LabelPlayerDesc6 = Label(right_pane, bg = bgcolor, text=skater.nationality)
+LabelPlayerDesc7 = Label(right_pane, bg = bgcolor, text=skater.size)
+
 
 
 #buttonStart = Button(window, text="Start", command=update)
@@ -702,15 +693,24 @@ LabelRecordHome.grid(row=11, column=2)
 
 SepVert.grid(row=1, column=3, rowspan=12, sticky=NS)
 
-LabelMediaText.grid(row=1, column=4, padx=2, sticky=W)
+LabelMediaText.grid(row=1, column=4, padx=2, sticky=W, columnspan=3)
 LabelMedia.grid(row=3, column=4, padx=5, rowspan=2, sticky=W)
-LabelDesc0.grid(row=2, column=4, padx=5, sticky=W)
-LabelPlayerPic.grid(row=5, column=4, sticky=W)
-LabelDesc1.grid(row=6, column=4, padx=5, sticky=W)
-LabelDesc2.grid(row=7, column=4, padx=5, sticky=W)
-LabelDesc3.grid(row=8, column=4, padx=5, sticky=W)
-LabelDesc4.grid(row=9, column=4, padx=5, sticky=W)
-LabelDesc5.grid(row=10, column=4, padx=5, sticky=W)
+LabelDesc0.grid(row=2, column=4, padx=5, sticky=W, columnspan=3)
+LabelPlayerPic.grid(row=5, column=4, sticky=NSEW)
+LabelDesc1.grid(row=6, column=4, padx=5, sticky=W, columnspan=3)
+LabelDesc2.grid(row=7, column=4, padx=5, sticky=W, columnspan=3)
+LabelDesc3.grid(row=8, column=4, padx=5, sticky=W, columnspan=3)
+LabelDesc4.grid(row=9, column=4, padx=5, sticky=W, columnspan=3)
+LabelDesc5.grid(row=10, column=4, padx=5, sticky=W, columnspan=3)
+
+#LabelPlayerPic.grid(row=1, column=0, sticky=W)
+LabelPlayerDesc1.grid(row=0, column=0, padx=0, sticky=W)
+LabelPlayerDesc2.grid(row=1, column=0, padx=0, sticky=W)
+LabelPlayerDesc3.grid(row=2, column=0, padx=0, sticky=W)
+LabelPlayerDesc4.grid(row=3, column=0, padx=0, sticky=W)
+LabelPlayerDesc5.grid(row=4, column=0, padx=0, sticky=W)
+LabelPlayerDesc6.grid(row=5, column=0, padx=0, sticky=W)
+LabelPlayerDesc7.grid(row=6, column=0, padx=0, sticky=W)
 
 
 LabelSpareRow4.grid(row=17, column=0) #spare
