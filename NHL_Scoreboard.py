@@ -320,11 +320,11 @@ def split(string_to_split):
     #take a string that is too long and split into 2 smaller strings
     line1 = ""
     line2 = ""
-    length = 77
+    length = 70
     if len(string_to_split) > length: #split long desc into two lines
         midpos = string_to_split.rindex(" ", 0, length + 1)
         string1 = slice(0, midpos, 1) 
-        string2 = slice(midpos, 165, 1)
+        string2 = slice(midpos, 140, 1)
         line1 = (string_to_split[string1])
         line2 = (string_to_split[string2] + "...")
         line2 = line2.lstrip()
@@ -657,6 +657,8 @@ LabelPlayerDesc4 = Label(right_pane, bg = bgcolor, text=skater.age_bday)
 LabelPlayerDesc5 = Label(right_pane, bg = bgcolor, text=skater.city)
 LabelPlayerDesc6 = Label(right_pane, bg = bgcolor, text=skater.nationality)
 LabelPlayerDesc7 = Label(right_pane, bg = bgcolor, text=skater.size)
+LabelPlayerDesc8 = Label(right_pane, bg = bgcolor, text=skater.hand)
+
 
 
 
@@ -711,6 +713,7 @@ LabelPlayerDesc4.grid(row=3, column=0, padx=0, sticky=W)
 LabelPlayerDesc5.grid(row=4, column=0, padx=0, sticky=W)
 LabelPlayerDesc6.grid(row=5, column=0, padx=0, sticky=W)
 LabelPlayerDesc7.grid(row=6, column=0, padx=0, sticky=W)
+LabelPlayerDesc8.grid(row=6, column=0, padx=0, sticky=W)
 
 
 LabelSpareRow4.grid(row=17, column=0) #spare
