@@ -54,10 +54,10 @@ class NHLPlayer:
         self.number = str('#' + response['people'][0]['primaryNumber'])
         self.birthday = response['people'][0]['birthDate']
         self.age = response['people'][0]['currentAge']
-        self.age_bday = str(response['people'][0]['currentAge']) + 'y, ' + str(response['people'][0]['birthDate'])
+        self.age_bday = str(response['people'][0]['birthDate']) + ', age ' + str(response['people'][0]['currentAge'])
         self.city = response['people'][0]['birthCity']
         self.nationality = response['people'][0]['nationality']
-        self.hand = str("Shoots\Catches " + response['people'][0]['shootsCatches'])
+        self.hand = str("Shoots " + response['people'][0]['shootsCatches'])
         self.position = response['people'][0]['primaryPosition']['abbreviation']
         self.size = str(response['people'][0]['height']) + ', ' + str(response['people'][0]['weight']) + 'lbs'
         self.headpic_url = NHL_PLAYER_PIC_URL  

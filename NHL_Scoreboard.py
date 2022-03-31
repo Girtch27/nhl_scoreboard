@@ -25,7 +25,8 @@ from lib import nhl, alert, media, nhlplayer
 
 # Creating a GUI Windows
 window = Tk()
-mainframe = ttk.Frame(window, padding="1 1 1 1")
+#mainframe = ttk.Frame(window, padding="1 1 1 1")
+mainframe = ttk.Frame(window, padding="0 0 0 0")
 mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
 window.columnconfigure(0, weight=1)
 window.rowconfigure(0, weight=1)
@@ -129,10 +130,10 @@ skater = nhlplayer.NHLPlayer(MM16)
 print(skater.fullname)
 print(skater.size)
 
+
 #myTeam is the team I want to follow
 myTeam = "Hurricanes"
 myTeam = "Panthers"
-myTeam = "Rangers"
 myTeam = "Sharks"
 myTeam = "Wild"
 myTeam = "Golden Knights"
@@ -142,8 +143,11 @@ myTeam = "Lightning"
 myTeam = "Senators"
 myTeam = "Flames"
 myTeam = "Lightning"
-myTeam = "Oilers"
 myTeam = "Maple Leafs" #default
+myTeam = "Rangers"
+myTeam = "Oilers"
+
+
 
 
 
@@ -367,6 +371,15 @@ def get_goal_info(content_team_id):
         LabelDesc4["text"] = '{0}'.format(highlight_description1)
         LabelDesc5["text"] = '{0}'.format(highlight_description2)
         skater = nhlplayer.NHLPlayer(playerID)
+        LabelPlayerDesc1["text"] = skater.fullname
+        LabelPlayerDesc2["text"] = skater.number
+        LabelPlayerDesc3["text"] = skater.position
+        LabelPlayerDesc4["text"] = skater.age_bday
+        LabelPlayerDesc5["text"] = skater.city
+        LabelPlayerDesc6["text"] = skater.nationality
+        LabelPlayerDesc7["text"] = skater.size
+        LabelPlayerDesc8["text"] = skater.hand
+
         if goal_count == new_score:
             print("cancel schedule................... " + str(goal_count))
             return schedule.CancelJob #cancel schedule if all goal descriptions returned until next goal detected
@@ -376,7 +389,8 @@ def get_goal_info(content_team_id):
         LabelDesc3["text"] = 'Getting goal info ... '.format()
         LabelDesc4["text"] = ''.format()
         LabelDesc5["text"] = ''.format()
-   
+
+    
 
 def update():
     global bgcolor #background colour
@@ -566,6 +580,16 @@ def update():
     LabelAwayPic.image = away_logo
     LabelPlayerPic.configure(image=skater.image)
     LabelPlayerPic.image = skater.image
+
+    LabelPlayerDesc1["text"] = skater.fullname
+    LabelPlayerDesc2["text"] = skater.number
+    LabelPlayerDesc3["text"] = skater.position
+    LabelPlayerDesc4["text"] = skater.age_bday
+    LabelPlayerDesc5["text"] = skater.city
+    LabelPlayerDesc6["text"] = skater.nationality
+    LabelPlayerDesc7["text"] = skater.size
+    LabelPlayerDesc8["text"] = skater.hand
+
     
     '''run schedule(s)'''
     schedule.run_pending()
@@ -660,8 +684,6 @@ LabelPlayerDesc7 = Label(right_pane, bg = bgcolor, text=skater.size)
 LabelPlayerDesc8 = Label(right_pane, bg = bgcolor, text=skater.hand)
 
 
-
-
 #buttonStart = Button(window, text="Start", command=update)
 buttonExit = Button(mainframe, bg = bgcolor, text="Exit", command=exit) #special command to exit & shutdown?
 #buttonVerify = Button(window, text="Verify Team", command=setup) #special command to exit & shutdown?
@@ -695,15 +717,15 @@ LabelRecordHome.grid(row=11, column=2)
 
 SepVert.grid(row=1, column=3, rowspan=12, sticky=NS)
 
-LabelMediaText.grid(row=1, column=4, padx=2, sticky=W, columnspan=3)
-LabelMedia.grid(row=3, column=4, padx=5, rowspan=2, sticky=W)
-LabelDesc0.grid(row=2, column=4, padx=5, sticky=W, columnspan=3)
+LabelMediaText.grid(row=1, column=4, padx=1, sticky=W, columnspan=3)
+LabelMedia.grid(row=3, column=4, padx=1, rowspan=2, sticky=W, columnspan=3)
+LabelDesc0.grid(row=2, column=4, padx=1, sticky=W, columnspan=3)
 LabelPlayerPic.grid(row=5, column=4, sticky=NSEW)
-LabelDesc1.grid(row=6, column=4, padx=5, sticky=W, columnspan=3)
-LabelDesc2.grid(row=7, column=4, padx=5, sticky=W, columnspan=3)
-LabelDesc3.grid(row=8, column=4, padx=5, sticky=W, columnspan=3)
-LabelDesc4.grid(row=9, column=4, padx=5, sticky=W, columnspan=3)
-LabelDesc5.grid(row=10, column=4, padx=5, sticky=W, columnspan=3)
+LabelDesc1.grid(row=6, column=4, padx=1, sticky=W, columnspan=3)
+LabelDesc2.grid(row=7, column=4, padx=1, sticky=W, columnspan=3)
+LabelDesc3.grid(row=8, column=4, padx=1, sticky=W, columnspan=3)
+LabelDesc4.grid(row=9, column=4, padx=1, sticky=W, columnspan=3)
+LabelDesc5.grid(row=10, column=4, padx=1, sticky=W, columnspan=3)
 
 #LabelPlayerPic.grid(row=1, column=0, sticky=W)
 LabelPlayerDesc1.grid(row=0, column=0, padx=0, sticky=W)
@@ -713,7 +735,7 @@ LabelPlayerDesc4.grid(row=3, column=0, padx=0, sticky=W)
 LabelPlayerDesc5.grid(row=4, column=0, padx=0, sticky=W)
 LabelPlayerDesc6.grid(row=5, column=0, padx=0, sticky=W)
 LabelPlayerDesc7.grid(row=6, column=0, padx=0, sticky=W)
-LabelPlayerDesc8.grid(row=6, column=0, padx=0, sticky=W)
+LabelPlayerDesc8.grid(row=7, column=0, padx=0, sticky=W)
 
 
 LabelSpareRow4.grid(row=17, column=0) #spare
