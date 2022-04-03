@@ -97,6 +97,7 @@ https://github.com/rpi-ws281x/rpi-ws281x-python #get led lights working
 
 ''' Initialize '''
 roster_counter = 0
+num_roster_players = 20 #2g, 6d, 12f. during roster() find number of players on roster
 delay_checked = False #delay_checked
 delay = 0.0 #delay used before starting goal notifications, set to 0 and see if too early compared to TV??
 delay = float(delay) #delay used before starting goal notifications
@@ -113,6 +114,8 @@ away_name = "" #away name ex Maple Leafs
 away_team = "" #away team name GUI ex Toronto Maple Leafs
 home_name = "" #home name ex Maple Leafs
 home_team = "" #home team name GUI ex Toronto Maple Leafs
+away_team_ID = "10"
+home_team_ID = "10"
 gameday = False #gameday status
 season = False #season
 home_logo = PhotoImage(file="/home/pi/nhl_scoreboard/images/PNG/NHL.png")
@@ -123,7 +126,7 @@ away_logo = PhotoImage(file="/home/pi/nhl_scoreboard/images/PNG/NHL.png")
 #player = nhlplayer.NHLPlayer("8478483") #Marner is 8478483, Mathews is 8479318
 #print(player.fullname)
 
-TMLroster = []
+TeamRoster = []
 
 MM16 = "8478483" #mitch
 AM34 = "8479318" #mathews
@@ -133,18 +136,8 @@ JC36 = "8475789" #Campbell
 MB58 = "8478047" #bunting
 MR44 = "8476853" #reilly
 
-TMLroster.append(MM16)
-TMLroster.append(AM34)
-TMLroster.append(JT91)
-TMLroster.append(WN88)
-TMLroster.append(JC36)
-TMLroster.append(MB58)
-TMLroster.append(MR44)
-
-#profile_player = randint(0, TMLroster.count)
-#print(profile_player)
-profile_player = choice(TMLroster)
-
+TeamRoster.extend([MM16,AM34,JT91,WN88,JC36,MB58,MR44])
+profile_player = choice(TeamRoster) #pick random person to start up
 
 #default
 skater_default = nhlplayer.NHLPlayer(profile_player)
@@ -398,15 +391,20 @@ def get_goal_info(content_team_id):
 def roster_update():
     global myTeam
     global roster_counter
+    global num_roster_players
+    global TeamRoster
     
-    team_id = nhl.get_team_id(myTeam)
-    roster = nhlplayer.NHLRoster(team_id)
-    #print(roster.rosterIDs)
-    skater = nhlplayer.NHLPlayer(roster[roster_counter])
+    if roster_counter == 0:
+        team_id = nhl.get_team_id(myTeam)
+        TeamRoster = nhlplayer.NHLRoster(team_id)
+        num_roster_players = len(TeamRoster.rosterIDs)
+        print("# players on roster:" + str(num_roster_players))
+    #print("count:" + str(roster_counter) + ", of total#:" + str(num_roster_players))
+    skater = nhlplayer.NHLPlayer(TeamRoster[roster_counter])
     update_player_info(skater)
 
     roster_counter = roster_counter + 1
-    if roster_counter > 10:
+    if roster_counter == (num_roster_players - 1): #last player, reset counter
         roster_counter = 0
 
 def update_player_info(Player):
@@ -427,11 +425,15 @@ def update_player_info(Player):
     else:
         LabelPlayerDesc2["text"] = Player.size + ", " + Player.position + ", Shoots " + Player.hand
     LabelPlayerDesc3["text"] = "Birthday: " + Player.birthday + ", Age " + str(Player.age)
-    LabelPlayerDesc4["text"] = "Born: " + Player.city + ", " + Player.state_province + ", " + Player.country
+    if Player.state_province == "n\a": #some players don't have states or provinces
+         LabelPlayerDesc4["text"] = "Born: " + Player.city + ", " + Player.country
+    else:
+        LabelPlayerDesc4["text"] = "Born: " + Player.city + ", " + Player.state_province + ", " + Player.country
     LabelPlayerDesc5["text"] = "Nationality: " + Player.nationality
     LabelPlayerDesc6["text"] = ""
     LabelPlayerDesc7["text"] = ""
-    LabelPlayerDesc8["text"] = ""         
+    LabelPlayerDesc8["text"] = ""
+    #time.sleep(1)         
 
 def update():
     global bgcolor #background colour
@@ -468,7 +470,7 @@ def update():
         logo(home_team_ID, away_team_ID) #home_logo , away_logo
         updateTeamInfo(nextGameDate)
         gameInfoUpdated = True #update game info flag
-        print('Game info updated. ' +  ' Home:' + str(home_team) + str(home_team_ID) + ', Away: ' + str(away_team) + str(away_team_ID))
+        print('Game info updated. ' +  ' Home: ' + str(home_team) + str(home_team_ID) + ', Away: ' + str(away_team) + str(away_team_ID))
             
     if ('No Game' in game_status):
         #get_goal_info(team_id)
@@ -503,7 +505,7 @@ def update():
         LabelDesc3["text"] = ""
         LabelDesc4["text"] = ""
         LabelDesc5["text"] = ""
-
+        roster_update()
                 
     elif ('Scheduled' in game_status):
         #game later today, find next game info
@@ -525,7 +527,6 @@ def update():
         LabelDesc4["text"] = ""
         LabelDesc5["text"] = ""
         roster_update()
-
     
     elif ('In Progress' in game_status) or ('Pre-Game' in game_status):
         new_score, home_score, away_score  = nhl.fetch_scores(team_id)
@@ -541,6 +542,7 @@ def update():
             LabelDesc3["text"] = ""
             LabelDesc4["text"] = ""
             LabelDesc5["text"] = ""
+            roster_update()
 
         else:
             LabelAwayName["text"] = away_team
@@ -609,7 +611,7 @@ def update():
         LabelDesc4["text"] = ""
         LabelDesc5["text"] = ""
 
-    
+ 
     else:
         print(game_status + ':' + str(updateSpeed) + ". ***invalid state***")
         updateSpeed = int(2*60*60*1000) # 2hr
@@ -621,14 +623,13 @@ def update():
     LabelHomePic.image = home_logo
     LabelAwayPic.image = away_logo
 
-    update_player_info(skater_default)
-
-  
+ 
     '''run schedule(s)'''
     schedule.run_pending()
     print("run pending schedules...")
     
-    window.after(updateSpeed, update) #run update function after Xms, must be cancel, idle, info, or an integer
+    #window.after(updateSpeed, update) #run update function after Xms, must be cancel, idle, info, or an integer
+    window.after(5000, update) #run update function after Xms, must be cancel, idle, info, or an integer
 
     
 '''create menu bar'''
@@ -673,11 +674,11 @@ LabelSpareRow1 = Label(left_pane_frame, bg = bgcolor, text="")
 LabelSpareRow2 = Label(left_pane_frame, bg = bgcolor, text="")
 LabelSpareRow3 = Label(left_pane_frame, bg = bgcolor, text="")
 LabelSpareRow4 = Label(left_pane_frame, bg = bgcolor, text="")
-LabelHomeTeam = Label(left_pane_frame, bg = bgcolor, text="Home Team", font=("bold", 16), width=20)
+LabelHomeTeam = Label(left_pane_frame, bg = bgcolor, text="Home Team", font=("bold", 16), width=17)
 LabelVS = Label(left_pane_frame, bg = bgcolor, text="vs", font=("bold", 24), width=2)
-LabelAwayTeam = Label(left_pane_frame, bg = bgcolor, text="Away Team", font=("bold", 16), width=20)
-LabelHomeName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=22)
-LabelAwayName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=22)
+LabelAwayTeam = Label(left_pane_frame, bg = bgcolor, text="Away Team", font=("bold", 16), width=17)
+LabelHomeName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=19)
+LabelAwayName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=19)
 LabelAwayScore = Label(left_pane_frame, bg = bgcolor, text="-", font=("bold", 80), width=5)
 LabelHomeScore = Label(left_pane_frame, bg = bgcolor, text="-", font=("bold", 80), width=5)
 
@@ -699,7 +700,7 @@ LabelHomePic = Label(left_pane_frame, bg = bgcolor, image=home_logo)
 
 SepVert = ttk.Separator(left_pane_frame, orient='vertical')
 
-LabelMediaText = Label(right_pane_frame, bg = bgcolor, text="Game Info | Status | Highlights", font=("bold", 16), width=25, padx=1)
+LabelMediaText = Label(right_pane_frame, bg = bgcolor, text="Game Info | Status | Highlights", font=("bold", 16), width=25)
 LabelDesc0 = Label(right_pane_frame, bg = bgcolor, text="", font=("normal", 10))
 LabelDesc1 = Label(right_pane_frame, bg = bgcolor, text="previous game status...", font=("normal", 10))
 LabelDesc2 = Label(right_pane_frame, bg = bgcolor, text="next game status", font=("normal", 10))
@@ -709,15 +710,15 @@ LabelDesc5 = Label(right_pane_frame, bg = bgcolor, text="desc5", font=("normal",
 LabelMedia = Label(right_pane_frame, bg = bgcolor, image=home_logo)
 
 LabelPlayerPic = Label(right_pane_frame, bg = bgcolor, image=skater_default.image)
-LabelPlayerDesc1 = Label(right_pane_frame, bg = bgcolor, text=skater_default.fullname, font=("bold", 18))
-LabelPlayerDesc2 = Label(right_pane_frame, bg = bgcolor, text=skater_default.number)
-LabelPlayerDesc3 = Label(right_pane_frame, bg = bgcolor, text=skater_default.position)
-LabelPlayerDesc4 = Label(right_pane_frame, bg = bgcolor, text=skater_default.age_bday)
-LabelPlayerDesc5 = Label(right_pane_frame, bg = bgcolor, text=skater_default.city)
-LabelPlayerDesc6 = Label(right_pane_frame, bg = bgcolor, text=skater_default.nationality)
-LabelPlayerDesc7 = Label(right_pane_frame, bg = bgcolor, text=skater_default.size)
-LabelPlayerDesc8 = Label(right_pane_frame, bg = bgcolor, text=skater_default.hand)
 
+LabelPlayerDesc1 = Label(right_pane_frame, bg = bgcolor, font=("bold", 18))
+LabelPlayerDesc2 = Label(right_pane_frame, bg = bgcolor)
+LabelPlayerDesc3 = Label(right_pane_frame, bg = bgcolor)
+LabelPlayerDesc4 = Label(right_pane_frame, bg = bgcolor)
+LabelPlayerDesc5 = Label(right_pane_frame, bg = bgcolor)
+LabelPlayerDesc6 = Label(right_pane_frame, bg = bgcolor)
+LabelPlayerDesc7 = Label(right_pane_frame, bg = bgcolor)
+LabelPlayerDesc8 = Label(right_pane_frame, bg = bgcolor)
 
 #buttonStart = Button(window, text="Start", command=update)
 buttonExit = Button(mainframe, bg = bgcolor, text="Exit", command=exit) #special command to exit & shutdown?
@@ -751,7 +752,7 @@ LabelRecordHome.grid(row=11, column=2)
 SepVert.grid(row=0, column=3, rowspan=12, sticky=NS)
 
 LabelDesc0.grid(row=0, column=1, padx=1, sticky=W, columnspan=3)
-LabelMediaText.grid(row=1, column=0, padx=1, sticky=W, columnspan=3)
+LabelMediaText.grid(row=1, column=1, padx=0, sticky=EW, columnspan=3)
 LabelDesc1.grid(row=2, column=1, padx=1, sticky=W, columnspan=3)
 LabelDesc2.grid(row=3, column=1, padx=1, sticky=W, columnspan=3)
 LabelDesc3.grid(row=16, column=1, padx=1, sticky=W, columnspan=3)

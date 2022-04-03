@@ -65,5 +65,9 @@ def get_goal_description(team_id, url):
                         highlight_description = item_type['highlight']['description']
                         playerID = item_type['playerId']
                         print('Goal by '  + description + ', ' + highlight_description)
-        
+                else:
+                    description = item_type['description']
+                    highlight_description = "getting goal highlights..."
+                    playerID = item_type['playerId']
+
     return description, highlight_description, playerID, goal_count

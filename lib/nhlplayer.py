@@ -61,7 +61,10 @@ class NHLPlayer:
         self.age = response['people'][0]['currentAge']
         self.age_bday = str(response['people'][0]['birthDate']) + ', age ' + str(response['people'][0]['currentAge'])
         self.city = response['people'][0]['birthCity']
-        self.state_province = response['people'][0]['birthStateProvince']
+        if 'birthStateProvince' in response['people'][0]: #some players don't have states or provinces
+            self.state_province = response['people'][0]['birthStateProvince']
+        else:
+            self.state_province = 'n\a' #return n\a and calling script changes prompt accordingly
         self.country = response['people'][0]['birthCountry']
         self.nationality = response['people'][0]['nationality']
         self.hand = response['people'][0]['shootsCatches']
