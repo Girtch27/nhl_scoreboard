@@ -49,7 +49,7 @@ def get_goal_description(team_id, url):
     """ returns only the last goal info"""
     goal_count = 0
     description = ""
-    highlight_description = ""
+    highlight_description = "getting goal highlights..."
     playerID = ""
     team_id_str = str(team_id)
     response = requests.get(url).json()
@@ -57,17 +57,16 @@ def get_goal_description(team_id, url):
         
     for item_type in milestones: #and (team is team_id))
         if ((item_type['title'] == 'Goal') and (item_type['teamId'] == team_id_str)):
+            goal_count = goal_count + 1 #used by calling code to check if all goal info are ready
             if 'highlight' in item_type:
                 if 'description' in item_type['highlight']:
                     if item_type['description'] is not "" and item_type['highlight']['description'] is not "":
-                        goal_count = goal_count + 1 #used by calling code to check if all goal info are ready
                         description = item_type['description']
                         highlight_description = item_type['highlight']['description']
-                        playerID = item_type['playerId']
-                        print('Goal by '  + description + ', ' + highlight_description)
-                else:
-                    description = item_type['description']
-                    highlight_description = "getting goal highlights..."
-                    playerID = item_type['playerId']
+            else:
+                description = item_type['description']
+                highlight_description = "getting goal highlights..."
+            playerID = item_type['playerId']
+            print('Goal by '  + description + ', ' + highlight_description)
 
     return description, highlight_description, playerID, goal_count

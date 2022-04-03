@@ -29,8 +29,8 @@ window = Tk()
 #mainframe = ttk.Frame(window, padding="1 1 1 1")
 mainframe = ttk.Frame(window, padding="0 0 0 0")
 mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
-window.columnconfigure(0, weight=1)
-window.rowconfigure(0, weight=1)
+window.columnconfigure(0, weight=0)
+window.rowconfigure(0, weight=0)
 #window_popup = Tk()
 
 #Create left pane
@@ -158,6 +158,11 @@ myTeam = "Lightning"
 myTeam = "Rangers"
 myTeam = "Oilers"
 myTeam = "Maple Leafs" #default
+myTeam = "Oilers"
+myTeam = "Devils"
+myTeam = "Islanders"
+
+
 
 
 window.title(myTeam + ' NHL Scoreboard')
@@ -367,10 +372,8 @@ def get_goal_info(content_team_id):
     '''
 
     description, highlight_description, playerID, goal_count = media.get_goal_description(content_team_id, content_url)
-    if ((description is not "") and (highlight_description is not "")):
+    if (description is not ""):
         LabelDesc3["text"] = 'Goal {0}! {1}'.format(goal_count, description)
-        #LabelDesc3["text"] = '{0}'.format(highlights_descr[1,2,3]) #us \n for a new line or wrap=WORD from https://www.tutorialspoint.com/how-to-word-wrap-text-in-tkinter-text
-        
         #split returned description to two lines
         highlight_description1, highlight_description2 = split(highlight_description)
         LabelDesc4["text"] = '{0}'.format(highlight_description1)
@@ -378,7 +381,7 @@ def get_goal_info(content_team_id):
         skater_scored = nhlplayer.NHLPlayer(playerID)
         update_player_info(skater_scored)
 
-        if goal_count == new_score:
+        if goal_count == new_score and highlight_description == "getting goal highlights...":
             print("cancel schedule................... " + str(goal_count))
             return schedule.CancelJob #cancel schedule if all goal descriptions returned until next goal detected
         print("keep schedule running................... " + str(goal_count))
@@ -511,7 +514,7 @@ def update():
         #game later today, find next game info
         home_team, home_team_ID, away_team, away_team_ID, nextGameDate = nhl.get_next_game_info2(team_id)
         print(game_status + ', game today: ' + str(home_team) + ' vs ' + str(away_team))
-        updateSpeed = int(1*60*60*1000) # 1hours, delay as game hasn't started
+        updateSpeed = int(2*60*1000) # 2min, delay as game hasn't started
         next_game_date_24hr, next_game_day, next_game_date_12hr  = nhl.get_next_game_date(team_id)
         today = datetime.date.today()
         LabelAwayName["text"] = away_team #was away_name
@@ -536,7 +539,7 @@ def update():
             LabelHomeName["text"] = home_team
             LabelAwayScore["text"] = "0"
             LabelHomeScore["text"] = "0"
-            updateSpeed = int(10*60*1000) # 10min, delay as game hasn't started
+            updateSpeed = int(60*1000) # 1min, delay as game hasn't started
             LabelDesc1["text"] = '{0} warmups, get ready!'.format(game_status)
             LabelDesc2["text"] = ""
             LabelDesc3["text"] = ""
@@ -629,7 +632,7 @@ def update():
     print("run pending schedules...")
     
     #window.after(updateSpeed, update) #run update function after Xms, must be cancel, idle, info, or an integer
-    window.after(5000, update) #run update function after Xms, must be cancel, idle, info, or an integer
+    window.after(updateSpeed, update) #run update function after Xms, must be cancel, idle, info, or an integer
 
     
 '''create menu bar'''
@@ -674,11 +677,11 @@ LabelSpareRow1 = Label(left_pane_frame, bg = bgcolor, text="")
 LabelSpareRow2 = Label(left_pane_frame, bg = bgcolor, text="")
 LabelSpareRow3 = Label(left_pane_frame, bg = bgcolor, text="")
 LabelSpareRow4 = Label(left_pane_frame, bg = bgcolor, text="")
-LabelHomeTeam = Label(left_pane_frame, bg = bgcolor, text="Home Team", font=("bold", 16), width=17)
+LabelHomeTeam = Label(left_pane_frame, bg = bgcolor, text="Home Team", font=("bold", 16), width=10)
 LabelVS = Label(left_pane_frame, bg = bgcolor, text="vs", font=("bold", 24), width=2)
-LabelAwayTeam = Label(left_pane_frame, bg = bgcolor, text="Away Team", font=("bold", 16), width=17)
-LabelHomeName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=19)
-LabelAwayName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=19)
+LabelAwayTeam = Label(left_pane_frame, bg = bgcolor, text="Away Team", font=("bold", 16), width=10)
+LabelHomeName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=15)
+LabelAwayName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=15)
 LabelAwayScore = Label(left_pane_frame, bg = bgcolor, text="-", font=("bold", 80), width=5)
 LabelHomeScore = Label(left_pane_frame, bg = bgcolor, text="-", font=("bold", 80), width=5)
 
