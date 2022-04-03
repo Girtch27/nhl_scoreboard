@@ -61,9 +61,14 @@ class NHLPlayer:
         self.age = response['people'][0]['currentAge']
         self.age_bday = str(response['people'][0]['birthDate']) + ', age ' + str(response['people'][0]['currentAge'])
         self.city = response['people'][0]['birthCity']
+        self.state_province = response['people'][0]['birthStateProvince']
+        self.country = response['people'][0]['birthCountry']
         self.nationality = response['people'][0]['nationality']
         self.hand = response['people'][0]['shootsCatches']
-        self.position = response['people'][0]['primaryPosition']['abbreviation']
+        self.alternate_captain = response['people'][0]['alternateCaptain']
+        self.captain = response['people'][0]['captain']
+        self.position_abbreviation = response['people'][0]['primaryPosition']['abbreviation']
+        self.position = response['people'][0]['primaryPosition']['name']
         self.size = str(response['people'][0]['height']) + ', ' + str(response['people'][0]['weight']) + 'lbs'
         self.headpic_url = NHL_PLAYER_PIC_URL  
         
@@ -96,12 +101,27 @@ class NHLPlayer:
             
     def get_city(self):
         return self.city
-    
+
+    def get_state_province(self):
+        return self.state_province
+
+    def get_country(self):
+        return self.country
+
     def get_nationality(self):
         return self.nationality
             
     def get_hand(self):
         return self.hand
+
+    def get_alternate_captain(self):
+        return self.alternate_captain
+
+    def get_captain(self):
+        return self.captain
+        
+    def get_position_abbreviation(self):
+        return self.position_abbreviation
 
     def get_position(self):
         return self.position

@@ -413,14 +413,22 @@ def update_player_info(Player):
     LabelPlayerPic.configure(image=Player.image)
     LabelPlayerPic.image = Player.image
 
-    LabelPlayerDesc1["text"] = Player.fullname + " | " + Player.number
-    if Player.position == "G" or Player.position == "g":
+    if Player.alternate_captain == True:
+        LabelPlayerDesc1["text"] = Player.fullname + " \"A\"" + " | " + Player.number
+
+    elif Player.captain == True:
+        LabelPlayerDesc1["text"] = Player.fullname + " \"C\"" + " | " + Player.number 
+
+    else:
+        LabelPlayerDesc1["text"] = Player.fullname + " | " + Player.number 
+
+    if Player.position_abbreviation == "G" or Player.position_abbreviation == "g":
         LabelPlayerDesc2["text"] = Player.size + ", " + Player.position + ", Catches " + Player.hand
     else:
         LabelPlayerDesc2["text"] = Player.size + ", " + Player.position + ", Shoots " + Player.hand
-    LabelPlayerDesc3["text"] = Player.birthday + ", age " + str(Player.age)
-    LabelPlayerDesc4["text"] = Player.city + ", " + Player.nationality
-    LabelPlayerDesc5["text"] = ""
+    LabelPlayerDesc3["text"] = "Birthday: " + Player.birthday + ", Age " + str(Player.age)
+    LabelPlayerDesc4["text"] = "Born: " + Player.city + ", " + Player.state_province + ", " + Player.country
+    LabelPlayerDesc5["text"] = "Nationality: " + Player.nationality
     LabelPlayerDesc6["text"] = ""
     LabelPlayerDesc7["text"] = ""
     LabelPlayerDesc8["text"] = ""         
