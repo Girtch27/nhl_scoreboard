@@ -18,19 +18,24 @@ NHL_API_ROSTER_URL = "https://statsapi.web.nhl.com/api/v1/teams/10?expand=team.r
 class NHLRoster:
     def __init__(self, TeamID):
         NHL_API_ROSTER_URL = "https://statsapi.web.nhl.com/api/v1/teams/"
-        NHL_API_ROSTER_URL = NHL_API_ROSTER_URL + TeamID + "?expand=team.roster"
+        NHL_API_ROSTER_URL = NHL_API_ROSTER_URL + str(TeamID) + "?expand=team.roster"
         
         response = requests.get(NHL_API_ROSTER_URL).json()
         players = response['teams'][0]['roster']['roster']
-
+        rosterID_list = []
         for playerID in players:
             #self.rosterIDs = players['person']['id']
             #print(players['person']['id'])
-            self.rosterID = playerID['person']
+            rosterID_list.append(playerID['person']['id'])
             #print(playerID['person']['id'])
+        self.rosterIDs = rosterID_list
+        self.roster = players
+    
+    def __getitem__(self, i):
+        return self.rosterIDs[i]
 
     def get_rosterIDs(self):
-        return self.rosterIDs
+        return self.rosterID_list
     
     def get_roster(self):
         return self.roster
@@ -41,10 +46,10 @@ class NHLPlayer:
 
     def __init__(self, ID):
         NHL_PLAYER_PIC_URL = "https://cms.nhl.bamgrid.com/images/headshots/current/168x168/"
-        NHL_PLAYER_PIC_URL = NHL_PLAYER_PIC_URL + ID + ".jpg"
+        NHL_PLAYER_PIC_URL = NHL_PLAYER_PIC_URL + str(ID) + ".jpg"
 
         NHL_API_PLAYER_URL = "http://statsapi.web.nhl.com/api/v1/people/"
-        NHL_API_PLAYER_URL = NHL_API_PLAYER_URL + ID
+        NHL_API_PLAYER_URL = NHL_API_PLAYER_URL + str(ID)
 
         response = requests.get(NHL_API_PLAYER_URL).json()
 
@@ -57,7 +62,7 @@ class NHLPlayer:
         self.age_bday = str(response['people'][0]['birthDate']) + ', age ' + str(response['people'][0]['currentAge'])
         self.city = response['people'][0]['birthCity']
         self.nationality = response['people'][0]['nationality']
-        self.hand = str("Shoots " + response['people'][0]['shootsCatches'])
+        self.hand = response['people'][0]['shootsCatches']
         self.position = response['people'][0]['primaryPosition']['abbreviation']
         self.size = str(response['people'][0]['height']) + ', ' + str(response['people'][0]['weight']) + 'lbs'
         self.headpic_url = NHL_PLAYER_PIC_URL  
@@ -111,8 +116,8 @@ class NHLPlayer:
         return self.image
 
 
-TeamID = "10"
-player = NHLRoster(TeamID)
+#TeamID = "10"
+#player = NHLRoster(TeamID)
 #print("print roster info: " + str(player.rosterIDs()))
 
 

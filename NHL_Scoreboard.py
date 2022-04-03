@@ -1,9 +1,10 @@
+from random import randint, random
+from secrets import choice
 from tkinter import *
 from tkinter import ttk
 import time
 import datetime
 import schedule
-
 
 ''' video stuff '''
 from tkvideo import tkvideo
@@ -32,14 +33,17 @@ window.columnconfigure(0, weight=1)
 window.rowconfigure(0, weight=1)
 #window_popup = Tk()
 
-# Create right pane
-main = ttk.PanedWindow(mainframe)
-main.grid(row=5, column=5, sticky="nsew")
-right_pane = ttk.Frame(main, width=100)
-#left_pane = ttk.PanedWindow(main, background="#99fb99", width=200)
-#main.add(left_pane)
-main.add(right_pane)
+#Create left pane
+left_pane = ttk.PanedWindow(mainframe)
+left_pane.grid(row=0, column=0, sticky="nsew")
+left_pane_frame = ttk.Frame(left_pane, width=100)
+left_pane.add(left_pane_frame)
 
+# Create right pane
+right_pane = ttk.PanedWindow(mainframe)
+right_pane.grid(row=0, column=1, sticky="nsew")
+right_pane_frame = ttk.Frame(right_pane, width=100)
+right_pane.add(right_pane_frame)
 
 window.title("NHL Scoreboard") #gets changed below after Team to follow is determined
 
@@ -92,6 +96,7 @@ https://github.com/rpi-ws281x/rpi-ws281x-python #get led lights working
 '''
 
 ''' Initialize '''
+roster_counter = 0
 delay_checked = False #delay_checked
 delay = 0.0 #delay used before starting goal notifications, set to 0 and see if too early compared to TV??
 delay = float(delay) #delay used before starting goal notifications
@@ -118,18 +123,32 @@ away_logo = PhotoImage(file="/home/pi/nhl_scoreboard/images/PNG/NHL.png")
 #player = nhlplayer.NHLPlayer("8478483") #Marner is 8478483, Mathews is 8479318
 #print(player.fullname)
 
+TMLroster = []
 
 MM16 = "8478483" #mitch
 AM34 = "8479318" #mathews
-JT91 = "" #taveras
-playerID1 = "8478047" #bunting
-playerID4 = "8477939"
+JT91 = "8475166" #taveras
+WN88 = "8477939" #Nylandr
+JC36 = "8475789" #Campbell
+MB58 = "8478047" #bunting
+MR44 = "8476853" #reilly
+
+TMLroster.append(MM16)
+TMLroster.append(AM34)
+TMLroster.append(JT91)
+TMLroster.append(WN88)
+TMLroster.append(JC36)
+TMLroster.append(MB58)
+TMLroster.append(MR44)
+
+#profile_player = randint(0, TMLroster.count)
+#print(profile_player)
+profile_player = choice(TMLroster)
+
 
 #default
-skater = nhlplayer.NHLPlayer(MM16)
-print(skater.fullname)
-print(skater.size)
-
+skater_default = nhlplayer.NHLPlayer(profile_player)
+print(skater_default.fullname)
 
 #myTeam is the team I want to follow
 myTeam = "Hurricanes"
@@ -143,12 +162,9 @@ myTeam = "Lightning"
 myTeam = "Senators"
 myTeam = "Flames"
 myTeam = "Lightning"
-myTeam = "Maple Leafs" #default
 myTeam = "Rangers"
 myTeam = "Oilers"
-
-
-
+myTeam = "Maple Leafs" #default
 
 
 window.title(myTeam + ' NHL Scoreboard')
@@ -209,7 +225,6 @@ def utilsVideo():
     LabelDesc4["text"] = '{0}'.format(highlight_description1)
     LabelDesc5["text"] = '{0}'.format(highlight_description2)
 
-    
 def utilsVideoStop():
     #video_label.pack_forget()
     #player.play()
@@ -228,7 +243,6 @@ def newWindow():
     window_popup_center_y = int((screen_height/2 - window_popup_window_height/2) + window_popup_offset_y)
     window_popup.geometry(f'{window_popup_window_width}x{window_popup_window_height}+{window_popup_center_x}+{window_popup_center_y}')
     window_popup.title("Media Highlights")
-    
     
     # create label
     video_label = Label(window_popup)
@@ -338,8 +352,6 @@ def split(string_to_split):
     return line1, line2
         
 def get_goal_info(content_team_id):
-#def get_goal_info():
-    global skater
     global new_score
     video_label = LabelMedia
     
@@ -370,15 +382,8 @@ def get_goal_info(content_team_id):
         highlight_description1, highlight_description2 = split(highlight_description)
         LabelDesc4["text"] = '{0}'.format(highlight_description1)
         LabelDesc5["text"] = '{0}'.format(highlight_description2)
-        skater = nhlplayer.NHLPlayer(playerID)
-        LabelPlayerDesc1["text"] = skater.fullname
-        LabelPlayerDesc2["text"] = skater.number
-        LabelPlayerDesc3["text"] = skater.position
-        LabelPlayerDesc4["text"] = skater.age_bday
-        LabelPlayerDesc5["text"] = skater.city
-        LabelPlayerDesc6["text"] = skater.nationality
-        LabelPlayerDesc7["text"] = skater.size
-        LabelPlayerDesc8["text"] = skater.hand
+        skater_scored = nhlplayer.NHLPlayer(playerID)
+        update_player_info(skater_scored)
 
         if goal_count == new_score:
             print("cancel schedule................... " + str(goal_count))
@@ -390,7 +395,35 @@ def get_goal_info(content_team_id):
         LabelDesc4["text"] = ''.format()
         LabelDesc5["text"] = ''.format()
 
+def roster_update():
+    global myTeam
+    global roster_counter
     
+    team_id = nhl.get_team_id(myTeam)
+    roster = nhlplayer.NHLRoster(team_id)
+    #print(roster.rosterIDs)
+    skater = nhlplayer.NHLPlayer(roster[roster_counter])
+    update_player_info(skater)
+
+    roster_counter = roster_counter + 1
+    if roster_counter > 10:
+        roster_counter = 0
+
+def update_player_info(Player):
+    LabelPlayerPic.configure(image=Player.image)
+    LabelPlayerPic.image = Player.image
+
+    LabelPlayerDesc1["text"] = Player.fullname + " | " + Player.number
+    if Player.position == "G" or Player.position == "g":
+        LabelPlayerDesc2["text"] = Player.size + ", " + Player.position + ", Catches " + Player.hand
+    else:
+        LabelPlayerDesc2["text"] = Player.size + ", " + Player.position + ", Shoots " + Player.hand
+    LabelPlayerDesc3["text"] = Player.birthday + ", age " + str(Player.age)
+    LabelPlayerDesc4["text"] = Player.city + ", " + Player.nationality
+    LabelPlayerDesc5["text"] = ""
+    LabelPlayerDesc6["text"] = ""
+    LabelPlayerDesc7["text"] = ""
+    LabelPlayerDesc8["text"] = ""         
 
 def update():
     global bgcolor #background colour
@@ -483,8 +516,9 @@ def update():
         LabelDesc3["text"] = ""
         LabelDesc4["text"] = ""
         LabelDesc5["text"] = ""
+        roster_update()
 
-
+    
     elif ('In Progress' in game_status) or ('Pre-Game' in game_status):
         new_score, home_score, away_score  = nhl.fetch_scores(team_id)
         
@@ -578,19 +612,10 @@ def update():
     LabelAwayPic.configure(image=away_logo)
     LabelHomePic.image = home_logo
     LabelAwayPic.image = away_logo
-    LabelPlayerPic.configure(image=skater.image)
-    LabelPlayerPic.image = skater.image
 
-    LabelPlayerDesc1["text"] = skater.fullname
-    LabelPlayerDesc2["text"] = skater.number
-    LabelPlayerDesc3["text"] = skater.position
-    LabelPlayerDesc4["text"] = skater.age_bday
-    LabelPlayerDesc5["text"] = skater.city
-    LabelPlayerDesc6["text"] = skater.nationality
-    LabelPlayerDesc7["text"] = skater.size
-    LabelPlayerDesc8["text"] = skater.hand
+    update_player_info(skater_default)
 
-    
+  
     '''run schedule(s)'''
     schedule.run_pending()
     print("run pending schedules...")
@@ -636,60 +661,61 @@ menubar.add_cascade(label="Exit", menu=exitmenu)
 '''create menu bar'''
 
 '''create label widgets'''
-SepVert = ttk.Separator(mainframe, orient='vertical')
-LabelSpareRow1 = Label(mainframe, bg = bgcolor, text="")
-LabelSpareRow2 = Label(mainframe, bg = bgcolor, text="")
-LabelSpareRow3 = Label(mainframe, bg = bgcolor, text="")
-LabelSpareRow4 = Label(mainframe, bg = bgcolor, text="")
-LabelHomeTeam = Label(mainframe, bg = bgcolor, text="Home Team", font=("bold", 16), width=20, padx=1)
-LabelVS = Label(mainframe, bg = bgcolor, text="vs", font=("bold", 24), width=2, padx=1)
-LabelAwayTeam = Label(mainframe, bg = bgcolor, text="Away Team", font=("bold", 16), width=20, padx=1)
-LabelHomeName = Label(mainframe, bg = bgcolor, text="name...", font=("bold", 16), width=22, padx=3)
-LabelAwayName = Label(mainframe, bg = bgcolor, text="name...", font=("bold", 16), width=22, padx=3)
-LabelAwayScore = Label(mainframe, bg = bgcolor, text="-", font=("bold", 80), width=5, padx=1)
-LabelHomeScore = Label(mainframe, bg = bgcolor, text="-", font=("bold", 80), width=5, padx=1)
-LabelDesc0 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
-LabelDesc1 = Label(mainframe, bg = bgcolor, text="previous game status...", font=("normal", 10))
-LabelDesc2 = Label(mainframe, bg = bgcolor, text="next game status", font=("normal", 10))
-LabelDesc3 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
-LabelDesc4 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
-LabelDesc5 = Label(mainframe, bg = bgcolor, text="", font=("normal", 10))
+LabelSpareRow1 = Label(left_pane_frame, bg = bgcolor, text="")
+LabelSpareRow2 = Label(left_pane_frame, bg = bgcolor, text="")
+LabelSpareRow3 = Label(left_pane_frame, bg = bgcolor, text="")
+LabelSpareRow4 = Label(left_pane_frame, bg = bgcolor, text="")
+LabelHomeTeam = Label(left_pane_frame, bg = bgcolor, text="Home Team", font=("bold", 16), width=20)
+LabelVS = Label(left_pane_frame, bg = bgcolor, text="vs", font=("bold", 24), width=2)
+LabelAwayTeam = Label(left_pane_frame, bg = bgcolor, text="Away Team", font=("bold", 16), width=20)
+LabelHomeName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=22)
+LabelAwayName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=22)
+LabelAwayScore = Label(left_pane_frame, bg = bgcolor, text="-", font=("bold", 80), width=5)
+LabelHomeScore = Label(left_pane_frame, bg = bgcolor, text="-", font=("bold", 80), width=5)
 
-LabelCityAway = Label(mainframe, bg = bgcolor, text=" <-Location-> ")
-LabelArenaAway = Label(mainframe, bg = bgcolor, text=" <-Arena-> ")
-LabelHistoryAway = Label(mainframe, bg = bgcolor, text=" <-Franchise Year-> ")
-LabelDivisionAway = Label(mainframe, bg = bgcolor, text=" <-Division-> ")
-LabelConferenceAway = Label(mainframe, bg = bgcolor, text=" <-Conference-> ")
-LabelRecordAway = Label(mainframe, bg = bgcolor, text="<-W-L-OT->")
-LabelAwayPic = Label(mainframe, bg = bgcolor, image=away_logo)
+LabelCityAway = Label(left_pane_frame, bg = bgcolor, text=" <-Location-> ")
+LabelArenaAway = Label(left_pane_frame, bg = bgcolor, text=" <-Arena-> ")
+LabelHistoryAway = Label(left_pane_frame, bg = bgcolor, text=" <-Franchise Year-> ")
+LabelDivisionAway = Label(left_pane_frame, bg = bgcolor, text=" <-Division-> ")
+LabelConferenceAway = Label(left_pane_frame, bg = bgcolor, text=" <-Conference-> ")
+LabelRecordAway = Label(left_pane_frame, bg = bgcolor, text="<-W-L-OT->")
+LabelAwayPic = Label(left_pane_frame, bg = bgcolor, image=away_logo)
 
-LabelCityHome = Label(mainframe, bg = bgcolor, text=" <-Location-> ")
-LabelArenaHome = Label(mainframe, bg = bgcolor, text=" <-Arena-> ")
-LabelHistoryHome = Label(mainframe, bg = bgcolor, text=" <-Franchise Year-> ")
-LabelDivisionHome = Label(mainframe, bg = bgcolor, text=" <-Division-> ")
-LabelConferenceHome = Label(mainframe, bg = bgcolor, text=" <-Conference-> ")
-LabelRecordHome = Label(mainframe, bg = bgcolor, text="<-W-L-OT->")
-LabelHomePic = Label(mainframe, bg = bgcolor, image=home_logo)
-LabelMediaText = Label(mainframe, bg = bgcolor, text="Game Info | Status | Highlights", font=("bold", 16), width=25, padx=2)
-LabelMedia = Label(mainframe, bg = bgcolor, image=home_logo)
+LabelCityHome = Label(left_pane_frame, bg = bgcolor, text=" <-Location-> ")
+LabelArenaHome = Label(left_pane_frame, bg = bgcolor, text=" <-Arena-> ")
+LabelHistoryHome = Label(left_pane_frame, bg = bgcolor, text=" <-Franchise Year-> ")
+LabelDivisionHome = Label(left_pane_frame, bg = bgcolor, text=" <-Division-> ")
+LabelConferenceHome = Label(left_pane_frame, bg = bgcolor, text=" <-Conference-> ")
+LabelRecordHome = Label(left_pane_frame, bg = bgcolor, text="<-W-L-OT->")
+LabelHomePic = Label(left_pane_frame, bg = bgcolor, image=home_logo)
 
-LabelPlayerPic = Label(mainframe, bg = bgcolor, image=skater.image)
-LabelPlayerDesc1 = Label(right_pane, bg = bgcolor, text=skater.fullname, font=("bold", 18))
-LabelPlayerDesc2 = Label(right_pane, bg = bgcolor, text=skater.number)
-LabelPlayerDesc3 = Label(right_pane, bg = bgcolor, text=skater.position)
-LabelPlayerDesc4 = Label(right_pane, bg = bgcolor, text=skater.age_bday)
-LabelPlayerDesc5 = Label(right_pane, bg = bgcolor, text=skater.city)
-LabelPlayerDesc6 = Label(right_pane, bg = bgcolor, text=skater.nationality)
-LabelPlayerDesc7 = Label(right_pane, bg = bgcolor, text=skater.size)
-LabelPlayerDesc8 = Label(right_pane, bg = bgcolor, text=skater.hand)
+SepVert = ttk.Separator(left_pane_frame, orient='vertical')
+
+LabelMediaText = Label(right_pane_frame, bg = bgcolor, text="Game Info | Status | Highlights", font=("bold", 16), width=25, padx=1)
+LabelDesc0 = Label(right_pane_frame, bg = bgcolor, text="", font=("normal", 10))
+LabelDesc1 = Label(right_pane_frame, bg = bgcolor, text="previous game status...", font=("normal", 10))
+LabelDesc2 = Label(right_pane_frame, bg = bgcolor, text="next game status", font=("normal", 10))
+LabelDesc3 = Label(right_pane_frame, bg = bgcolor, text="desc3", font=("normal", 10))
+LabelDesc4 = Label(right_pane_frame, bg = bgcolor, text="desc4", font=("normal", 10))
+LabelDesc5 = Label(right_pane_frame, bg = bgcolor, text="desc5", font=("normal", 10))
+LabelMedia = Label(right_pane_frame, bg = bgcolor, image=home_logo)
+
+LabelPlayerPic = Label(right_pane_frame, bg = bgcolor, image=skater_default.image)
+LabelPlayerDesc1 = Label(right_pane_frame, bg = bgcolor, text=skater_default.fullname, font=("bold", 18))
+LabelPlayerDesc2 = Label(right_pane_frame, bg = bgcolor, text=skater_default.number)
+LabelPlayerDesc3 = Label(right_pane_frame, bg = bgcolor, text=skater_default.position)
+LabelPlayerDesc4 = Label(right_pane_frame, bg = bgcolor, text=skater_default.age_bday)
+LabelPlayerDesc5 = Label(right_pane_frame, bg = bgcolor, text=skater_default.city)
+LabelPlayerDesc6 = Label(right_pane_frame, bg = bgcolor, text=skater_default.nationality)
+LabelPlayerDesc7 = Label(right_pane_frame, bg = bgcolor, text=skater_default.size)
+LabelPlayerDesc8 = Label(right_pane_frame, bg = bgcolor, text=skater_default.hand)
 
 
 #buttonStart = Button(window, text="Start", command=update)
 buttonExit = Button(mainframe, bg = bgcolor, text="Exit", command=exit) #special command to exit & shutdown?
 #buttonVerify = Button(window, text="Verify Team", command=setup) #special command to exit & shutdown?
-'''create label widgets'''
 
-'''define widget's grid layout'''
+'''LEFT define widget's grid layout'''
 LabelSpareRow1.grid(row=0, column=0) #spare
 LabelAwayTeam.grid(row=1, column=0)
 LabelAwayName.grid(row=2, column=0)
@@ -714,28 +740,27 @@ LabelHistoryHome.grid(row=8, column=2)
 LabelDivisionHome.grid(row=9, column=2)
 LabelConferenceHome.grid(row=10, column=2)
 LabelRecordHome.grid(row=11, column=2)
+SepVert.grid(row=0, column=3, rowspan=12, sticky=NS)
 
-SepVert.grid(row=1, column=3, rowspan=12, sticky=NS)
+LabelDesc0.grid(row=0, column=1, padx=1, sticky=W, columnspan=3)
+LabelMediaText.grid(row=1, column=0, padx=1, sticky=W, columnspan=3)
+LabelDesc1.grid(row=2, column=1, padx=1, sticky=W, columnspan=3)
+LabelDesc2.grid(row=3, column=1, padx=1, sticky=W, columnspan=3)
+LabelDesc3.grid(row=16, column=1, padx=1, sticky=W, columnspan=3)
+LabelDesc4.grid(row=17, column=1, padx=1, sticky=W, columnspan=3)
+LabelDesc5.grid(row=18, column=1, padx=1, sticky=W, columnspan=3)
+LabelMedia.grid(row=19, column=1, padx=1, rowspan=2, sticky=W, columnspan=3)
 
-LabelMediaText.grid(row=1, column=4, padx=1, sticky=W, columnspan=3)
-LabelMedia.grid(row=3, column=4, padx=1, rowspan=2, sticky=W, columnspan=3)
-LabelDesc0.grid(row=2, column=4, padx=1, sticky=W, columnspan=3)
-LabelPlayerPic.grid(row=5, column=4, sticky=NSEW)
-LabelDesc1.grid(row=6, column=4, padx=1, sticky=W, columnspan=3)
-LabelDesc2.grid(row=7, column=4, padx=1, sticky=W, columnspan=3)
-LabelDesc3.grid(row=8, column=4, padx=1, sticky=W, columnspan=3)
-LabelDesc4.grid(row=9, column=4, padx=1, sticky=W, columnspan=3)
-LabelDesc5.grid(row=10, column=4, padx=1, sticky=W, columnspan=3)
+LabelPlayerPic.grid(row=4, column=1, sticky=NSEW, rowspan=11)
 
-#LabelPlayerPic.grid(row=1, column=0, sticky=W)
-LabelPlayerDesc1.grid(row=0, column=0, padx=0, sticky=W)
-LabelPlayerDesc2.grid(row=1, column=0, padx=0, sticky=W)
-LabelPlayerDesc3.grid(row=2, column=0, padx=0, sticky=W)
-LabelPlayerDesc4.grid(row=3, column=0, padx=0, sticky=W)
-LabelPlayerDesc5.grid(row=4, column=0, padx=0, sticky=W)
-LabelPlayerDesc6.grid(row=5, column=0, padx=0, sticky=W)
-LabelPlayerDesc7.grid(row=6, column=0, padx=0, sticky=W)
-LabelPlayerDesc8.grid(row=7, column=0, padx=0, sticky=W)
+LabelPlayerDesc1.grid(row=4, column=2, padx=0, sticky=W)
+LabelPlayerDesc2.grid(row=5, column=2, padx=0, sticky=W)
+LabelPlayerDesc3.grid(row=6, column=2, padx=0, sticky=W)
+LabelPlayerDesc4.grid(row=7, column=2, padx=0, sticky=W)
+LabelPlayerDesc5.grid(row=8, column=2, padx=0, sticky=W)
+LabelPlayerDesc6.grid(row=9, column=2, padx=0, sticky=W)
+LabelPlayerDesc7.grid(row=10, column=2, padx=0, sticky=W)
+LabelPlayerDesc8.grid(row=11, column=2, padx=0, sticky=W)
 
 
 LabelSpareRow4.grid(row=17, column=0) #spare
