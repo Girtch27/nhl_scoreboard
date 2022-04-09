@@ -104,6 +104,7 @@ delay = float(delay) #delay used before starting goal notifications
 gameInfoUpdated = False #update game info flag
 updateSpeed = int(10*1000) #delay before checking game status & game scores
 game_status = "waiting"
+period_status = ""
 old_score = 100 #old_score for followed team, play notification
 new_score = 0 #new score for followed team, play notification
 home_score = 0 #home score for GUI
@@ -156,11 +157,15 @@ myTeam = "Senators"
 myTeam = "Flames"
 myTeam = "Lightning"
 myTeam = "Oilers"
+myTeam = "Maple Leafs" #default
 myTeam = "Oilers"
 myTeam = "Devils"
 myTeam = "Islanders"
 myTeam = "Rangers"
-myTeam = "Maple Leafs" #default
+
+
+
+
 
 window.title(myTeam + ' NHL Scoreboard')
 ScoreVerse = "vs"
@@ -267,19 +272,6 @@ def logo(image1, image2):
     imgX2= Image.open(defaultIMG2)
     away_logo = ImageTk.PhotoImage(imgX2)
 
-def updateGamesPlayed(record):
-    #gets team record and converts to W, L, OTL
-    print(record)
-    split = record.rsplit()
-    split = split[0].rsplit("-")
-    W = int(split[0])
-    L = int(split[1])
-    OTL = int(split[2])
-    GP = W + L + OTL
-    GR = 82 - GP
-    GP_GR = str(GP) +'|' + str(GR) + ' (GP|GR Totals)'
-    return GP_GR
-
 def updateTeamInfo(nextGameDate):
     '''update info only before or after a game, not during'''
     global away_team_ID
@@ -292,7 +284,6 @@ def updateTeamInfo(nextGameDate):
     LabelDivisionAway["text"] = nhl.get_team_division_info(away_team_ID) + ' Division'
     LabelConferenceAway["text"] = nhl.get_team_conference_info(away_team_ID) + ' Conference'   
     LabelRecordAway["text"] = nhl.get_team_record_info(away_team_ID, nextGameDate)
-    LabelGamesAway["text"] = updateGamesPlayed(LabelRecordAway["text"])
 
     LabelCityHome["text"] = nhl.get_team_arena_city(home_team_ID)
     LabelArenaHome["text"] = nhl.get_team_arena_name(home_team_ID)
@@ -300,9 +291,6 @@ def updateTeamInfo(nextGameDate):
     LabelDivisionHome["text"] = nhl.get_team_division_info(home_team_ID) + ' Division'
     LabelConferenceHome["text"] = nhl.get_team_conference_info(home_team_ID) + ' Conference'
     LabelRecordHome["text"] = nhl.get_team_record_info(home_team_ID, nextGameDate)
-    LabelGamesHome["text"] = updateGamesPlayed(LabelRecordHome["text"])
-
-
     
 def donothing():
     filewin = Toplevel(window)
@@ -362,7 +350,17 @@ def split(string_to_split):
         line1  = string_to_split
         line2 =  ""
     return line1, line2
-        
+
+'''
+def get_period_status(content_team_id)
+    global period_status
+
+    content_date = datetime.date.today()
+    content_date = content_date.strftime('%Y-%m-%d') #format should end us as "2022-02-22"
+    content_url = media.get_content_url(content_team_id, content_date)
+    period_status = media.get_period_description(content_team_id, content_url)
+ '''   
+
 def get_goal_info(content_team_id):
     global new_score
     video_label = LabelMedia
@@ -472,6 +470,7 @@ def update():
     global away_logo
     global away_team_ID
     global home_team_ID
+    global period_status
 
            
     '''get info from NHL.com'''
@@ -495,7 +494,7 @@ def update():
         #no game today, find next game info  
         home_team, home_team_ID, away_team, away_team_ID, nextGameDate = nhl.get_next_game_info2(team_id)
         print(game_status + ' today, next game is: ' + str(home_team) + ' vs ' + str(away_team))
-        updateSpeed = int(30*60*1000) # 30mins, delay as game hasn't started
+        updateSpeed = int(2*60*60*1000) # 2hours, delay as game hasn't started
         
         next_game_date_24hr, next_game_day, next_game_date_12hr  = nhl.get_next_game_date(team_id)
         today = datetime.date.today()
@@ -509,7 +508,8 @@ def update():
         LabelAwayScore["text"] = "-"
         LabelHomeScore["text"] = "-"
         LabelAwayName["text"] = next_away_team #was away_name
-        LabelHomeName["text"] = next_home_team #was home_name   
+        LabelHomeName["text"] = next_home_team #was home_name
+        LabelPeriod["text"] = ""
          
         if (team_id == away_team_ID):
             LabelDesc1["text"] = '{0} (away) vs {1} (home)'.format(away_team, home_team)
@@ -631,7 +631,7 @@ def update():
  
     else:
         print(game_status + ':' + str(updateSpeed) + ". ***invalid state***")
-        updateSpeed = int(30*60*1000) # 30mins
+        updateSpeed = int(2*60*60*1000) # 2hr
         
     # save the panel's image from 'garbage collection'
     # panel1.image = image1
@@ -692,12 +692,14 @@ LabelSpareRow2 = Label(left_pane_frame, bg = bgcolor, text="")
 LabelSpareRow3 = Label(left_pane_frame, bg = bgcolor, text="")
 LabelSpareRow4 = Label(left_pane_frame, bg = bgcolor, text="")
 LabelHomeTeam = Label(left_pane_frame, bg = bgcolor, text="Home Team", font=("bold", 16), width=10)
-LabelVS = Label(left_pane_frame, bg = bgcolor, text="vs", font=("bold", 24), width=2)
 LabelAwayTeam = Label(left_pane_frame, bg = bgcolor, text="Away Team", font=("bold", 16), width=10)
-LabelHomeName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=18)
-LabelAwayName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=18)
+LabelHomeName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=15)
+LabelAwayName = Label(left_pane_frame, bg = bgcolor, text="name...", font=("bold", 16), width=15)
 LabelAwayScore = Label(left_pane_frame, bg = bgcolor, text="-", font=("bold", 80), width=5)
 LabelHomeScore = Label(left_pane_frame, bg = bgcolor, text="-", font=("bold", 80), width=5)
+
+LabelVS = Label(left_pane_frame, bg = bgcolor, text="vs", font=("bold", 24), width=2)
+LabelPeriod = Label(left_pane_frame, bg = bgcolor, text="", font=("bold", 14), width=6)
 
 LabelCityAway = Label(left_pane_frame, bg = bgcolor, text=" <-Location-> ")
 LabelArenaAway = Label(left_pane_frame, bg = bgcolor, text=" <-Arena-> ")
@@ -705,8 +707,6 @@ LabelHistoryAway = Label(left_pane_frame, bg = bgcolor, text=" <-Franchise Year-
 LabelDivisionAway = Label(left_pane_frame, bg = bgcolor, text=" <-Division-> ")
 LabelConferenceAway = Label(left_pane_frame, bg = bgcolor, text=" <-Conference-> ")
 LabelRecordAway = Label(left_pane_frame, bg = bgcolor, text="<-W-L-OT->")
-LabelGamesAway = Label(left_pane_frame, bg = bgcolor, text="<-GP, remaining->")
-
 LabelAwayPic = Label(left_pane_frame, bg = bgcolor, image=away_logo)
 
 LabelCityHome = Label(left_pane_frame, bg = bgcolor, text=" <-Location-> ")
@@ -715,8 +715,6 @@ LabelHistoryHome = Label(left_pane_frame, bg = bgcolor, text=" <-Franchise Year-
 LabelDivisionHome = Label(left_pane_frame, bg = bgcolor, text=" <-Division-> ")
 LabelConferenceHome = Label(left_pane_frame, bg = bgcolor, text=" <-Conference-> ")
 LabelRecordHome = Label(left_pane_frame, bg = bgcolor, text="<-W-L-OT->")
-LabelGamesHome = Label(left_pane_frame, bg = bgcolor, text="<-GP, remaining->")
-
 LabelHomePic = Label(left_pane_frame, bg = bgcolor, image=home_logo)
 
 SepVert = ttk.Separator(left_pane_frame, orient='vertical')
@@ -757,9 +755,9 @@ LabelHistoryAway.grid(row=8, column=0)
 LabelDivisionAway.grid(row=9, column=0)
 LabelConferenceAway.grid(row=10, column=0)
 LabelRecordAway.grid(row=11, column=0)
-LabelGamesAway.grid(row=12, column=0)
 
 LabelVS.grid(row=2, column=1)
+LabelPeriod.grid(row=3, column=1)
 
 LabelHomeTeam.grid(row=1, column=2)
 LabelHomeName.grid(row=2, column=2)
@@ -771,8 +769,6 @@ LabelHistoryHome.grid(row=8, column=2)
 LabelDivisionHome.grid(row=9, column=2)
 LabelConferenceHome.grid(row=10, column=2)
 LabelRecordHome.grid(row=11, column=2)
-LabelGamesHome.grid(row=12, column=2)
-
 SepVert.grid(row=0, column=3, rowspan=12, sticky=NS)
 
 LabelDesc0.grid(row=0, column=1, padx=1, sticky=W, columnspan=3)
