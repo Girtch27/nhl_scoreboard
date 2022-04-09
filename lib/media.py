@@ -70,3 +70,15 @@ def get_goal_description(team_id, url):
             print('Goal by '  + description + ', ' + highlight_description)
 
     return description, highlight_description, playerID, goal_count
+
+'''
+def get_period_description(team_id, url):
+    """ Function to get period status for team_ID at url"""
+    info = ""
+    team_id_str = str(team_id)
+    response = requests.get(url).json()
+    milestones = response['media']['milestones']['items']linescore currentPeriodOrdinal
+        
+    for item_type in milestones: #and (team is team_id))
+        if ((item_type['title'] == 'Goal') and (item_type['teamId'] == team_id_str)):
+'''
