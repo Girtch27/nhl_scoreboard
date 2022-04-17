@@ -32,15 +32,18 @@ def get_video_url(team_id, url):
     """ returns only the last goal info"""
     highlight_videoURL = ""
     response = requests.get(url).json()
-    milestones = response['media']['milestones']['items']
-    print('game media url: ' + url + ' teamID: ' + str(team_id))
+    if ['items'] in response['media']['milestones']:
+        milestones = response['media']['milestones']['items']
+        print('game media url: ' + url + ' teamID: ' + str(team_id))
         
-    for item_type in milestones: #and (team is team_id))
-        if ((item_type['title'] == 'Goal') and (item_type['teamId'] == team_id)):
-            description = item_type['description']
-            highlight_description = item_type['highlight']['description']
-            highlight_videoURL = item_type['highlight']['playbacks'][0]['url'] #0 url for 320x180, 2 is 640x360
-            print('Goal video url '  + highlight_videoURL)
+        for item_type in milestones: #and (team is team_id))
+            if ((item_type['title'] == 'Goal') and (item_type['teamId'] == team_id)):
+                description = item_type['description']
+                highlight_description = item_type['highlight']['description']
+                highlight_videoURL = item_type['highlight']['playbacks'][0]['url'] #0 url for 320x180, 2 is 640x360
+                print('Goal video url '  + highlight_videoURL)
+    else:
+        print('items not found in response media milestones')
 
     return highlight_videoURL
 

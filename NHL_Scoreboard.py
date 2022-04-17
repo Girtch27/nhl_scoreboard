@@ -1,9 +1,12 @@
+from asyncio import sleep
+from multiprocessing.connection import wait
 from random import randint, random
 from secrets import choice
 from tkinter import *
 from tkinter import ttk
 import time
-import datetime
+import requests
+from datetime import date, datetime, timedelta
 import schedule
 
 ''' video stuff '''
@@ -17,7 +20,7 @@ from PIL import ImageTk, Image
 
 ''' OS parts '''
 import os
-import datetime
+#import datetime
 #import os #used to find config file and\or save status to file
 import pause
 
@@ -80,7 +83,7 @@ window.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}") #centre
 window.geometry(f"{screen_width}x{screen_height}+{0}+{0}") #full sized window based on screen size
 
 
-content_date = datetime.date.today()
+content_date = date.today()
 content_date = content_date.strftime('%Y-%m-%d') #format should end us as "2022-02-22"
 print(content_date)
     
@@ -139,6 +142,23 @@ MR44 = "8476853" #reilly
 TeamRoster.extend([MM16,AM34,JT91,WN88,JC36,MB58,MR44])
 profile_player = choice(TeamRoster) #pick random person to start up
 
+
+def checkConnected():
+    url = "http://www.nhl.com"
+    timeout = 5
+    try:
+        request = requests.get(url, timeout=timeout)
+        print("Connected to: " + url)
+    except (requests.ConnectionError, requests.Timeout) as exception:
+        print("No internet connection. Timed out after " + str(timeout) + " seconds!!!")
+        #sleep(600) #10mins, in seconds
+        retry = 10*60*1000
+        window.after(retry, checkConnected) #retry after Xms, must be cancel, idle, info, or an integer
+
+'''check internet see if www.nhl.com replies'''
+checkConnected()
+
+
 #default
 skater_default = nhlplayer.NHLPlayer(profile_player)
 print(skater_default.fullname)
@@ -191,7 +211,6 @@ for imgToOpen in imgPNG:
 alert.setup() #lights and music\audio
 #print ("Team ID : {0} \nDelay to use : {1}\n".format(team_id,delay))
 print ("Delay to use : {0}\n".format(delay))
-
 
 def utilsVideo():
     '''play a video highlight'''
@@ -268,8 +287,7 @@ def logo(image1, image2):
     away_logo = ImageTk.PhotoImage(imgX2)
 
 def updateGamesPlayed(record):
-    #gets team record and converts to W, L, OTL
-    print(record)
+    #gets team record and converts to W, L, OTL then to games played and remaining games
     split = record.rsplit()
     split = split[0].rsplit("-")
     W = int(split[0])
@@ -277,7 +295,7 @@ def updateGamesPlayed(record):
     OTL = int(split[2])
     GP = W + L + OTL
     GR = 82 - GP
-    GP_GR = str(GP) +'|' + str(GR) + ' (GP|GR Totals)'
+    GP_GR = str(GP) + 'gp | ' + str(GR) + 'gr'
     return GP_GR
 
 def updateTeamInfo(nextGameDate):
@@ -301,8 +319,6 @@ def updateTeamInfo(nextGameDate):
     LabelConferenceHome["text"] = nhl.get_team_conference_info(home_team_ID) + ' Conference'
     LabelRecordHome["text"] = nhl.get_team_record_info(home_team_ID, nextGameDate)
     LabelGamesHome["text"] = updateGamesPlayed(LabelRecordHome["text"])
-
-
     
 def donothing():
     filewin = Toplevel(window)
@@ -367,7 +383,7 @@ def get_goal_info(content_team_id):
     global new_score
     video_label = LabelMedia
     
-    content_date = datetime.date.today()
+    content_date = date.today()
     content_date = content_date.strftime('%Y-%m-%d') #format should end us as "2022-02-22"
     
     #content_team_id = "10"
@@ -473,12 +489,13 @@ def update():
     global away_team_ID
     global home_team_ID
 
-           
+    '''check internet see if www.nhl.com replies'''
+    checkConnected()
+
     '''get info from NHL.com'''
     #print (game_status)
     team_id = nhl.get_team_id(myTeam)
-
-    today = datetime.date.today()
+    today = date.today()
 
     game_status = nhl.check_game_status(team_id,today) #send team_id and today's date, get back game status
         
@@ -498,7 +515,7 @@ def update():
         updateSpeed = int(30*60*1000) # 30mins, delay as game hasn't started
         
         next_game_date_24hr, next_game_day, next_game_date_12hr  = nhl.get_next_game_date(team_id)
-        today = datetime.date.today()
+        today = date.today()
         next_home_team = home_team #set next game info and keep today's game info separate
         next_away_team = away_team #set next game info and keep today's game info separate
                 
@@ -530,7 +547,7 @@ def update():
         print(game_status + ', game today: ' + str(home_team) + ' vs ' + str(away_team))
         updateSpeed = int(2*60*1000) # 2min, delay as game hasn't started
         next_game_date_24hr, next_game_day, next_game_date_12hr  = nhl.get_next_game_date(team_id)
-        today = datetime.date.today()
+        today = date.today()
         LabelAwayName["text"] = away_team #was away_name
         LabelHomeName["text"] = home_team #was home_name
         LabelAwayScore["text"] = "-"
