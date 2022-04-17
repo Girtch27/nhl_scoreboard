@@ -208,13 +208,13 @@ def get_team_record_info(team_id, date):
         team_recordL = team_record['dates'][0]['games'][0]['teams']['home']['leagueRecord']['losses']
         team_recordOT = team_record['dates'][0]['games'][0]['teams']['home']['leagueRecord']['ot']
         team_points = 2*team_recordW + team_recordOT
-        team_recordWLOT = str(team_recordW) + '-' + str(team_recordL) + '-' +  str(team_recordOT) + ' (W-L-OTL)'  + ', ' + str(team_points) + ' pts'
+        team_recordWLOT = str(team_recordW) + '-' + str(team_recordL) + '-' +  str(team_recordOT) + ' (W-L-OTL)'  + ', ' + str(team_points) + ' points'
     else:
         team_recordW = team_record['dates'][0]['games'][0]['teams']['away']['leagueRecord']['wins']
         team_recordL = team_record['dates'][0]['games'][0]['teams']['away']['leagueRecord']['losses']
         team_recordOT = team_record['dates'][0]['games'][0]['teams']['away']['leagueRecord']['ot']
         team_points = 2*team_recordW + team_recordOT
-        team_recordWLOT = str(team_recordW) + '-' + str(team_recordL) + '-' +  str(team_recordOT) + ' (W-L-OTL)' + ', ' + str(team_points) + ' pts'
+        team_recordWLOT = str(team_recordW) + '-' + str(team_recordL) + '-' +  str(team_recordOT) + ' (W-L-OTL)' + ', ' + str(team_points) + ' points'
     #print(str(team_id) + ' ' + str(date) + ' ' + team_recordWLOT)
     return team_recordWLOT
 
